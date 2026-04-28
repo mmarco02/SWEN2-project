@@ -13,4 +13,4 @@ WORKDIR /app
 COPY --from=build /build/target/SWEN2-Tour-Planner-0.0.1-SNAPSHOT.jar app.jar
 USER app
 EXPOSE 8080
-ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
