@@ -1,0 +1,26 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE / OS
+.idea
+*.iml
+.DS_Store
+Thumbs.db
+
+# Maven build output
+target/
+
+# Node / frontend dev artefacts
+frontend/node_modules
+frontend/dist
+frontend/.env.local
+frontend/.env.*.local
+
+# Environment secrets
+.env
+.env.local
+
+# Docs
+*.md
