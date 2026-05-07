@@ -1,5 +1,6 @@
 # SWEN2-project
 
+## Für Development:
 
 Datenbank starten:<br>
 ``docker-compose up db -d ``
@@ -14,3 +15,12 @@ cd /frontend
 npm ci
 npm run dev
 ```
+
+
+## Für alles ausführen
+
+```
+docker-compose up
+```
+
+führt datenbank, backend und frontent aus
