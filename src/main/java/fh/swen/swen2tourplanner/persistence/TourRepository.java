@@ -9,5 +9,8 @@ import java.util.List;
 
 @Repository
 public interface TourRepository extends JpaRepository<Tour, Long> {
+    List<Tour> findByUserId(Long userId);
+    List<Tour> findTourByFromLocationAndToLocation(String fromLocation, String toLocation);
 
+    List<Tour> findTourByUserId(Long userId);
 }

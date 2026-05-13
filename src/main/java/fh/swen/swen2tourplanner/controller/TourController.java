@@ -26,7 +26,25 @@ class TourController {
 
     @PostMapping("/create")
     public ResponseEntity<TourDTO> createTour(@RequestBody TourDTO tour) {
-        TourDTO createdTour = TourDTO.fromEntity(tourService.createTour(tour.toEntity()));
+        TourDTO createdTour = TourDTO.fromEntity(tourService.createTour(tour));
         return ResponseEntity.ok(createdTour);
+    }
+
+    @GetMapping("/getFromTo")
+    public ResponseEntity<List<TourDTO>> getToursFromTo(@RequestParam String from, @RequestParam String to){
+        List<TourDTO> tourDTOS = tourService.getToursFromTo(from, to)
+                .stream()
+                .map(TourDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(tourDTOS);
+    }
+
+    @GetMapping("users/{userId}")
+    public ResponseEntity<List<TourDTO>> getToursFromUser(@PathVariable Long userId) {
+        List<TourDTO> tourDTOS = tourService.getToursByUserId(userid)
+                .stream()
+                .map(TourDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(tourDTOS);
     }
 }
