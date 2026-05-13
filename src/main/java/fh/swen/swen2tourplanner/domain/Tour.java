@@ -3,11 +3,12 @@ package fh.swen.swen2tourplanner.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import fh.swen.swen2tourplanner.domain.enums.TransportType;
 import jakarta.persistence.*;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Table(name = "tours")
@@ -45,8 +46,11 @@ public class Tour {
     @Column
     private String route;
 
-    @OneToMany(mappedBy = "tour")
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<TourLog> tourLogs;
-
 }
