@@ -30,6 +30,18 @@ class TourController {
         return ResponseEntity.ok(createdTour);
     }
 
+    @PutMapping("/{tourId}")
+    public ResponseEntity<TourDTO> update(@PathVariable Long tourId, @RequestBody TourDTO tourDTO) {
+        TourDTO updatedDTO = TourDTO.fromEntity(tourService.updateTour(tourId, tourDTO));
+        return ResponseEntity.ok(updatedDTO);
+    }
+
+    @DeleteMapping("/{tourId}")
+    public ResponseEntity<Void> delete(@PathVariable Long tourId) {
+        tourService.deleteTour(tourId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/getFromTo")
     public ResponseEntity<List<TourDTO>> getToursFromTo(@RequestParam String from, @RequestParam String to){
         List<TourDTO> tourDTOS = tourService.getToursFromTo(from, to)
@@ -46,17 +58,5 @@ class TourController {
                 .map(TourDTO::fromEntity)
                 .toList();
         return ResponseEntity.ok(tourDTOS);
-    }
-
-    @PutMapping("/{tourId}")
-    public ResponseEntity<TourDTO> update(@PathVariable Long tourId, @RequestBody TourDTO tourDTO) {
-        TourDTO updatedDTO = TourDTO.fromEntity(tourService.updateTour(tourId, tourDTO));
-        return ResponseEntity.ok(updatedDTO);
-    }
-
-    @DeleteMapping("/{tourId}")
-    public ResponseEntity<Void> delete(@PathVariable Long tourId) {
-        tourService.deleteTour(tourId);
-        return ResponseEntity.noContent().build();
     }
 }
