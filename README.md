@@ -23,4 +23,4 @@ npm run dev
 docker-compose up
 ```
 
-führt datenbank, backend und frontent aus
+führt datenbank, backend und frontent aus (aber dann kein hot-reload)
