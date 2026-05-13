@@ -37,13 +37,13 @@ class TourLogController {
     }
 
     @PutMapping("/{logId}")
-    public ResponseEntity<TourLogDTO> update(@PathVariable Long logId, @RequestBody TourLogDTO tourLogDTO) {
+    public ResponseEntity<TourLogDTO> update(@PathVariable Long tourId, @PathVariable Long logId, @RequestBody TourLogDTO tourLogDTO) {
         TourLogDTO updatedDTO = TourLogDTO.fromEntity(tourLogService.update(logId, tourLogDTO));
         return ResponseEntity.ok(updatedDTO);
     }
 
     @DeleteMapping("/{logId}")
-    public ResponseEntity<Void> delete(@PathVariable Long logId) {
+    public ResponseEntity<Void> delete(@PathVariable Long tourId, @PathVariable Long logId) {
         tourLogService.delete(logId);
         return ResponseEntity.noContent().build();
     }
