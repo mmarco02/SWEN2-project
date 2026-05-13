@@ -15,8 +15,8 @@ public class UserService {
 
     public User register(UserDTO dto) {
         User user = new User();
-        user.setUsername(dto.getUsername());
-        user.setPassword(passwordHash.hash(dto.getPassword()));
+        user.setUsername(dto.username());
+        user.setPassword(passwordHash.hash(dto.password()));
         return userRepository.save(user);
     }
 
