@@ -49,6 +49,7 @@ public class SearchService {
         return new SearchResult(tours, tourLogs);
     }
 
+    // Indexes all Entities on Backend Startup (because normally data added from data.sql on startup isnt)
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
     public void rebuildIndex() throws InterruptedException {
