@@ -10,6 +10,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +49,7 @@ public class SearchService {
         return new SearchResult(tours, tourLogs);
     }
 
+    @EventListener(ApplicationReadyEvent.class)
     @Transactional
     public void rebuildIndex() throws InterruptedException {
         logger.info("Rebuilding Hibernate Search index");
