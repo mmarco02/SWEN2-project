@@ -1,8 +1,12 @@
 <script setup>
+import { ref, onMounted } from 'vue'
 
-var tours;
+const tours = ref([])
 
-tours = fetch("/tours")
+onMounted(async () => {
+  const response = await fetch('/tours')
+  tours.value = await response.json()
+})
 </script>
 
 <template>
@@ -12,8 +16,11 @@ tours = fetch("/tours")
     documentation
   </p>
 
-  <div v-for="(value, key) in tours" :key="key">
-    {{ key }}: {{ value }}
+  <p v-if="tours.length === 0">No tours found.</p>
+  <div v-for="tour in tours" :key="tour.id">
+    <h3>{{ tour.name }}</h3>
+    <p>from: {{ tour.fromLocation }} to: {{ tour.toLocation }}</p>
+    <p>{{ tour.description }}</p>
   </div>
 
 </template>
