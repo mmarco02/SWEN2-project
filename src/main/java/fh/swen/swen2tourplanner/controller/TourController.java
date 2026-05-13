@@ -41,7 +41,7 @@ class TourController {
 
     @GetMapping("users/{userId}")
     public ResponseEntity<List<TourDTO>> getToursFromUser(@PathVariable Long userId) {
-        List<TourDTO> tourDTOS = tourService.getToursByUserId(userid)
+        List<TourDTO> tourDTOS = tourService.getToursByUserId(userId)
                 .stream()
                 .map(TourDTO::fromEntity)
                 .toList();
