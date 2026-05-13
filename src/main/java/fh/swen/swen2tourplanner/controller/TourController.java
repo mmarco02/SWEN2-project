@@ -47,4 +47,16 @@ class TourController {
                 .toList();
         return ResponseEntity.ok(tourDTOS);
     }
+
+    @PutMapping("/{tourId}")
+    public ResponseEntity<TourDTO> update(@PathVariable Long tourId, @RequestBody TourDTO tourDTO) {
+        TourDTO updatedDTO = TourDTO.fromEntity(tourService.updateTour(tourId, tourDTO));
+        return ResponseEntity.ok(updatedDTO);
+    }
+
+    @DeleteMapping("/{tourId}")
+    public ResponseEntity<Void> delete(@PathVariable Long tourId) {
+        tourService.deleteTour(tourId);
+        return ResponseEntity.noContent().build();
+    }
 }
