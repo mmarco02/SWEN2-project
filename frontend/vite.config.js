@@ -22,6 +22,14 @@ export default defineConfig({
         target: 'http://localhost:8081',
         changeOrigin: true,
       },
+      '/users': {
+        target: 'http://localhost:8081/users',
+        changeOrigin: true,
+      },
+      '/tours': {
+        target: 'http://localhost:8081/tours',
+        changeOrigin: true,
+      },
     },
   },
 })
