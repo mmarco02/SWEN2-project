@@ -1,5 +1,8 @@
 <script setup>
 import { RouterView, RouterLink } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.js'
+
+const auth = useAuthStore()
 </script>
 
 <template>
@@ -7,7 +10,8 @@ import { RouterView, RouterLink } from 'vue-router'
     <RouterLink to="/" class="nav-main">Tour Planner</RouterLink>
     <div class="nav-links">
       <RouterLink to="/">Home</RouterLink>
-      <RouterLink to="/login">Login</RouterLink>
+      <RouterLink v-if="auth.isLoggedIn" @click="auth.logout()" to="/login">Log Out</RouterLink>
+      <RouterLink v-else to="/login">Log In</RouterLink>
     </div>
   </nav>
   <main class="content">

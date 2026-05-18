@@ -1,6 +1,6 @@
 INSERT INTO users (username, password) VALUES
-    ('alice', 'password123'),
-    ('bob', 'password456');
+    ('alice', '$2a$10$hD51u7KprdS7PCKDH/x1aOS8O7XADX0jYvG9gKjgDLqlq54Elif8K'), --password123
+    ('bob', '$2a$10$kDHupV3lLANp49COx0RlleZ.Gem59A0dqUNR6V.aVfV3UzAd3I/12');  --password456
 
 INSERT INTO tours (name, description, from_location, to_location, transport_type, distance_km, estimated_time, route, user_id) VALUES
     ('Wiener Stadtwanderung', 'Gemütliche Wanderung durch die Wiener Innenstadt', 'Wien Stephansplatz', 'Wien Schönbrunn', 'WALKING', 6.5, 90, NULL, 1),
