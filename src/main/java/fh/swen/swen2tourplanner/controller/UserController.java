@@ -19,8 +19,12 @@ class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserDTO userDTO) {
-        userService.register(userDTO);
-        return ResponseEntity.ok("User registered successfully");
+        try {
+            userService.register(userDTO);
+            return ResponseEntity.ok("User registered successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(409).body(e.getMessage());
+        }
     }
 
     @PostMapping("/login")

@@ -14,6 +14,9 @@ public class UserService {
     private final PasswordHash passwordHash;
 
     public User register(UserDTO dto) {
+        if (userRepository.findByUsername(dto.username()).isPresent()) {
+            throw new IllegalArgumentException("Username already taken");
+        }
         User user = new User();
         user.setUsername(dto.username());
         user.setPassword(passwordHash.hash(dto.password()));
