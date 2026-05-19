@@ -30,8 +30,8 @@ async function register() {
     <h1>Register</h1>
     <form @submit.prevent="register">
       <div class="form-wrapper">
-        <input class="username-input" v-model="username" placeholder="Username">
-        <input class="password-input" v-model="password" type="password" placeholder="Password">
+        <input class="username-input" v-model="username" required="required" placeholder="Username">
+        <input class="password-input" v-model="password" required="required" type="password" placeholder="Password">
         <button type="submit">Register</button>
         <span>Already have an Account? <RouterLink to="/login"><b>Log in here</b></RouterLink></span>
       </div>
