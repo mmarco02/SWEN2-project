@@ -19,6 +19,25 @@ const auth = useAuthStore()
   </main>
 </template>
 
+
+<style>
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+</style>
+
 <style scoped>
 .navbar {
   display: flex;
@@ -55,6 +74,7 @@ const auth = useAuthStore()
 }
 
 .content {
-  padding: 1.5rem;
+  display: flex;
+  flex: 1;
 }
 </style>
