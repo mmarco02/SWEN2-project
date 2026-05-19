@@ -6,30 +6,27 @@ import fh.swen.swen2tourplanner.dto.TourDTO;
 import fh.swen.swen2tourplanner.persistence.TourRepository;
 import fh.swen.swen2tourplanner.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TourService {
-
-    private static final Logger logger = LogManager.getLogger(TourService.class);
-
     private final TourRepository tourRepository;
     private final UserRepository userRepository;
 
     public List<Tour> getAll() {
-        logger.debug("Fetching all tours");
+        log.debug("Fetching all tours");
         return tourRepository.findAll();
     }
 
     public Tour createTour(TourDTO dto) {
         User user = userRepository.findById(dto.userId())
                 .orElseThrow(() -> {
-                    logger.warn("User not found: id={}", dto.userId());
+                    log.warn("User not found: id={}", dto.userId());
                     return new IllegalArgumentException("User not found");
                 });
 
@@ -37,24 +34,24 @@ public class TourService {
         tour.setUser(user);
 
         Tour saved = tourRepository.save(tour);
-        logger.info("Tour created: id={}", saved.getId());
+        log.info("Tour created: id={}", saved.getId());
         return saved;
     }
 
     public List<Tour> getToursByUserId(Long userId) {
-        logger.debug("Fetching tours for userId={}", userId);
+        log.debug("Fetching tours for userId={}", userId);
         return tourRepository.findTourByUserId(userId);
     }
 
     public List<Tour> getToursFromTo(String from, String to) {
-        logger.debug("Fetching tours from={} to={}", from, to);
+        log.debug("Fetching tours from={} to={}", from, to);
         return tourRepository.findTourByFromLocationAndToLocation(from, to);
     }
 
     public Tour updateTour(Long id, TourDTO dto) {
         Tour existing = tourRepository.findById(id)
                 .orElseThrow(() -> {
-                    logger.warn("Tour not found: id={}", id);
+                    log.warn("Tour not found: id={}", id);
                     return new IllegalArgumentException("Tour not found");
                 });
 
@@ -68,12 +65,12 @@ public class TourService {
         existing.setRoute(dto.route());
 
         Tour saved = tourRepository.save(existing);
-        logger.info("Tour updated: id={}", saved.getId());
+        log.info("Tour updated: id={}", saved.getId());
         return saved;
     }
 
     public void deleteTour(Long id) {
         tourRepository.deleteById(id);
-        logger.info("Tour deleted: id={}", id);
+        log.info("Tour deleted: id={}", id);
     }
 }

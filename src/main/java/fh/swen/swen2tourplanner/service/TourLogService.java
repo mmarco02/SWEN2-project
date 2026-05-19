@@ -8,12 +8,14 @@ import fh.swen.swen2tourplanner.persistence.TourLogRepository;
 import fh.swen.swen2tourplanner.persistence.TourRepository;
 import fh.swen.swen2tourplanner.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TourLogService {
 
     private final TourLogRepository tourLogRepository;
