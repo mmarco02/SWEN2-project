@@ -35,6 +35,36 @@ html, body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  font-family: Roboto, sans-serif;
+  color: #333;
+}
+
+input, select, textarea {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #2c3e50;
+}
+
+button {
+  padding: 0.5rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #2c3e50;
+  color: #fff;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #1a252f;
 }
 </style>
 
@@ -68,10 +98,14 @@ html, body {
   transition: background-color 0.2s;
 }
 
-.nav-links a:hover,
+.nav-links a:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+/*
 .nav-links a.router-link-active {
   background-color: rgba(255, 255, 255, 0.15);
 }
+ */
 
 .content {
   display: flex;
