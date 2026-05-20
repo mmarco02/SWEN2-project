@@ -23,6 +23,15 @@ public class TourService {
         return tourRepository.findAll();
     }
 
+    public Tour getById(Long id) {
+        log.debug("Fetching tour: id={}", id);
+        return tourRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Tour not found: id={}", id);
+                    return new IllegalArgumentException("Tour not found");
+                });
+    }
+
     public Tour createTour(TourDTO dto) {
         User user = userRepository.findById(dto.userId())
                 .orElseThrow(() -> {
