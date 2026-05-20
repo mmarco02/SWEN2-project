@@ -80,7 +80,8 @@ onMounted(() => {
   <div class="main-layout">
     <aside class="sidebar">
       <div class="sidebar-header">
-        <h2>Tours</h2>
+        <h2>Your Tours</h2>
+        <button @click="router.push('/search')"> Search Tours </button>
       </div>
 
       <form class="tour-form" @submit.prevent="saveTour">
