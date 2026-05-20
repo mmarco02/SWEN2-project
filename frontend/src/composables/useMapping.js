@@ -8,7 +8,12 @@ export function useMapping() {
     }
 
 
+    function hrsAndMinsToMinutes(hours, minutes) {
+        return (hours || 0) * 60 + (minutes || 0)
+    }
+
     return {
-        minutesToHrsAndMins
+        minutesToHrsAndMins,
+        hrsAndMinsToMinutes,
     }
 }
