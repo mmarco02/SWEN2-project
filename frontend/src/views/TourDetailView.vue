@@ -27,6 +27,7 @@ const newLog = ref({
 })
 const logTimeHours = ref(0)
 const logTimeMinutes = ref(0)
+const logDate = ref(new Date().toISOString().slice(0, 10))
 
 onMounted(async () => {
   await fetchTour()
@@ -63,7 +64,7 @@ async function addLog() {
     body: JSON.stringify({
       ...newLog.value,
       totalTime: hrsAndMinsToMinutes(logTimeHours.value, logTimeMinutes.value),
-      dateTime: new Date().toISOString(),
+      dateTime: new Date(logDate.value).toISOString(),
       tourId: Number(route.params.id),
       userId: Number(auth.userId),
     }),
@@ -74,6 +75,7 @@ async function addLog() {
     newLog.value = { comment: '', difficulty: 'MEDIUM', totalDistance: 0, rating: 3 }
     logTimeHours.value = 0
     logTimeMinutes.value = 0
+    logDate.value = new Date().toISOString().slice(0, 10)
   }
 }
 
@@ -130,6 +132,10 @@ const estimatedTime = computed(() => {
         </div>
 
         <form v-if="showLogForm" class="log-form" @submit.prevent="addLog">
+          <label>
+            Date
+            <input v-model="logDate" type="datetime-local" required>
+          </label>
           <textarea v-model="newLog.comment" placeholder="Comment" rows="2"></textarea>
           <div class="form-row">
             <label>
