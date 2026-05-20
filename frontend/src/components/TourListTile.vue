@@ -1,4 +1,6 @@
 <script setup>
+import router from "@/router/index.js";
+
 const props = defineProps({
   tour: {
     type: Object,
@@ -8,7 +10,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="tour-tile" @click="$emit('select', tour)">
+  <div class="tour-tile" @click="router.push('/tour/' + tour.id)">
     <div class="tour-tile-header">
       <h4>{{ tour.name }}</h4>
       <span class="transport-badge">{{ tour.transportType }}</span>
