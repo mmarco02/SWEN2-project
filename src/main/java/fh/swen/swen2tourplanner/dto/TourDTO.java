@@ -13,7 +13,8 @@ public record TourDTO(
         double distanceKm,
         Integer estimatedTime,
         String route,
-        Long userId
+        Long userId,
+        String userUsername
 ) {
     public static TourDTO fromEntity(Tour tour) {
         return new TourDTO(
@@ -26,7 +27,8 @@ public record TourDTO(
                 tour.getDistanceKm(),
                 tour.getEstimatedTime(),
                 tour.getRoute(),
-                tour.getUser().getId()
+                tour.getUser().getId(),
+                tour.getUser().getUsername()
         );
     }
 
