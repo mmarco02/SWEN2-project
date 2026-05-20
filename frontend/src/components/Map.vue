@@ -1,15 +1,21 @@
 <script setup>
 import {ref, watch, onMounted, onUnmounted} from 'vue'
+import {useOpenRoute} from '@/composables/useOpenRoute.js'
+
+const { getRoute } = useOpenRoute()
 
 const props = defineProps({
-  tour: {
-    type: Object,
-    default: null,
-  },
+  start: { type: Object, default: null },
+  end: { type: Object, default: null },
+  startName: {type: String, default: 'Start'},
+  endName: {type: String, default: 'End'},
+  transportType: { type: String, default: 'WALKING' },
 })
 
 const mapContainer = ref(null)
 let map = null
+let startMarker = null
+let endMarker = null
 let routeLayer = null
 
 onMounted(() => {
@@ -20,9 +26,7 @@ onMounted(() => {
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(map)
 
-  if (props.tour) {
-    renderRoute(props.tour)
-  }
+  updateMarkers()
 })
 
 onUnmounted(() => {
@@ -32,28 +36,51 @@ onUnmounted(() => {
   }
 })
 
-watch(() => props.tour, (newTour) => {
-  if (routeLayer) {
-    map.removeLayer(routeLayer)
-    routeLayer = null
-  }
-  if (newTour) {
-    renderRoute(newTour)
-  }
+watch(() => [props.start, props.end], () => {
+  updateMarkers()
 })
 
-function renderRoute(tour) {
-  if (!tour.route || !map) return
+function updateMarkers() {
+  if (!map) return
 
-  try {
-    const geojson = JSON.parse(tour.route)
-    routeLayer = L.geoJSON(geojson, {
-      style: {color: '#3388ff', weight: 4},
-    }).addTo(map)
-    map.fitBounds(routeLayer.getBounds(), {padding: [30, 30]})
-  } catch {
-    // route data isn't valid GeoJSON
+  if (startMarker) { map.removeLayer(startMarker); startMarker = null }
+  if (endMarker) { map.removeLayer(endMarker); endMarker = null }
+  if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null }
+
+  if (props.start) {
+    startMarker = L.marker([props.start.lat, props.start.lng])
+      .addTo(map)
+      .bindPopup(props.startName)
   }
+
+  if (props.end) {
+    endMarker = L.marker([props.end.lat, props.end.lng])
+      .addTo(map)
+      .bindPopup(props.endName)
+  }
+
+  if (props.start && props.end) {
+    const bounds = L.latLngBounds(
+      [props.start.lat, props.start.lng],
+      [props.end.lat, props.end.lng],
+    )
+    map.fitBounds(bounds, { padding: [50, 50] })
+    fetchRoute(props.start, props.end)
+  } else if (props.start) {
+    map.setView([props.start.lat, props.start.lng], 13)
+  } else if (props.end) {
+    map.setView([props.end.lat, props.end.lng], 13)
+  }
+}
+
+async function fetchRoute(start, end) {
+  const result = await getRoute(start, end, props.transportType)
+  if (!result) return
+
+  routeLayer = L.geoJSON(result.geojson, {
+    style: { color: '#3388ff', weight: 4 },
+  }).addTo(map)
+  map.fitBounds(routeLayer.getBounds(), { padding: [50, 50] })
 }
 </script>
 
