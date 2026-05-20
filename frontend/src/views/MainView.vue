@@ -1,9 +1,10 @@
 <script setup>
-import {ref, onMounted, watch} from 'vue'
+import {ref, onMounted, watch, computed} from 'vue'
 import router from "@/router/index.js"
 import {useAuthStore} from '@/stores/auth.js'
 import TourListTile from '@/components/TourListTile.vue'
 import {useOpenRoute} from '@/composables/useOpenRoute.js'
+import {useMapping} from "@/composables/useMapping.js";
 
 const auth = useAuthStore()
 
@@ -56,7 +57,11 @@ async function saveTour() {
 }
 
 const { getDistanceAndTime } = useOpenRoute()
-const routeEstimate = ref(null)
+const { minutesToHrsAndMins } = useMapping()
+
+const routeEstimate = ref()
+const estimateHours = ref('')
+const estimateMinutes = ref('')
 
 let estimateTimeout = null
 watch(
@@ -67,6 +72,11 @@ watch(
     if (!from || !to) return
     estimateTimeout = setTimeout(async () => {
       routeEstimate.value = await getDistanceAndTime(from, to, transportType)
+      if (routeEstimate.value) {
+        const { hours, minutes } = minutesToHrsAndMins(routeEstimate.value.estimatedTimeMin)
+        estimateHours.value = hours
+        estimateMinutes.value = minutes
+      }
     }, 500)
   },
 )
@@ -96,8 +106,8 @@ onMounted(() => {
           <option value="WALKING">Walking</option>
           <option value="BUS">Bus</option>
         </select>
-        <div v-if="routeEstimate">
-          <span>Estimated Time: {{ routeEstimate.estimatedTimeMin }} min</span>
+        <div class="route-estimation" v-if="routeEstimate">
+          <span>Estimated Time: {{ estimateHours }} h {{ estimateMinutes }} min</span>
           <span>Estimated Distance: {{ routeEstimate.distanceKm }} km</span>
         </div>
         <button type="submit">Add Tour</button>
@@ -164,6 +174,12 @@ onMounted(() => {
 .tour-list {
   display: flex;
   flex-direction: column;
+}
+
+.route-estimation {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .empty-state {

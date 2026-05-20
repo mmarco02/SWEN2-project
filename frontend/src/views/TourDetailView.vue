@@ -1,11 +1,12 @@
 <script setup>
-import {onMounted, ref} from 'vue'
+import {onMounted, ref, computed} from 'vue'
 import {useRoute} from 'vue-router'
 import router from '@/router/index.js'
 import {useAuthStore} from '@/stores/auth.js'
 import Map from '@/components/Map.vue'
 import TourLogTile from "@/components/TourLogTile.vue";
 import {useOpenRoute} from '@/composables/useOpenRoute.js'
+import {useMapping} from "@/composables/useMapping.js";
 
 const { getCoordsFromLocationName } = useOpenRoute()
 
@@ -85,6 +86,12 @@ function formatDate(dateTime) {
   })
 }
 
+const { minutesToHrsAndMins } = useMapping()
+const estimatedTime = computed(() => {
+  if (!tour.value?.estimatedTime) return { hours: 0, minutes: 0 }
+  return minutesToHrsAndMins(tour.value.estimatedTime)
+})
+
 </script>
 
 <template>
@@ -106,7 +113,7 @@ function formatDate(dateTime) {
         <p v-if="tour.description" class="tour-description">{{ tour.description }}</p>
         <div class="tour-meta">
           <span v-if="tour.distanceKm"><strong>Distance:</strong> {{ tour.distanceKm }} km</span>
-          <span v-if="tour.estimatedTime"><strong>Est. time:</strong> {{ tour.estimatedTime }} min</span>
+          <span v-if="tour.estimatedTime"><strong>Est. time:</strong> {{ estimatedTime.hours }} h {{ estimatedTime.minutes }} min</span>
         </div>
       </div>
 
