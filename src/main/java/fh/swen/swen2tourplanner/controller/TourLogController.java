@@ -26,25 +26,37 @@ class TourLogController {
 
     @PostMapping
     public ResponseEntity<TourLogDTO> create(@PathVariable Long tourId, @RequestBody TourLogDTO tourLogDTO) {
-        TourLogDTO createdDTO = TourLogDTO.fromEntity(
-                tourLogService.create(new TourLogDTO(
-                        tourLogDTO.id(), tourLogDTO.dateTime(), tourLogDTO.comment(), tourLogDTO.difficulty(),
-                        tourLogDTO.totalDistance(), tourLogDTO.totalTime(), tourLogDTO.rating(),
-                        tourId, tourLogDTO.userId()
-                ))
-        );
-        return ResponseEntity.ok(createdDTO);
+        try {
+            TourLogDTO createdDTO = TourLogDTO.fromEntity(
+                    tourLogService.create(new TourLogDTO(
+                            tourLogDTO.id(), tourLogDTO.dateTime(), tourLogDTO.comment(), tourLogDTO.difficulty(),
+                            tourLogDTO.totalDistance(), tourLogDTO.totalTime(), tourLogDTO.rating(),
+                            tourId, tourLogDTO.userId()
+                    ))
+            );
+            return ResponseEntity.status(201).body(createdDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PutMapping("/{logId}")
     public ResponseEntity<TourLogDTO> update(@PathVariable Long tourId, @PathVariable Long logId, @RequestBody TourLogDTO tourLogDTO) {
-        TourLogDTO updatedDTO = TourLogDTO.fromEntity(tourLogService.update(logId, tourLogDTO));
-        return ResponseEntity.ok(updatedDTO);
+        try {
+            TourLogDTO updatedDTO = TourLogDTO.fromEntity(tourLogService.update(logId, tourLogDTO));
+            return ResponseEntity.ok(updatedDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{logId}")
     public ResponseEntity<Void> delete(@PathVariable Long tourId, @PathVariable Long logId) {
-        tourLogService.delete(logId);
-        return ResponseEntity.noContent().build();
+        try {
+            tourLogService.delete(logId);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

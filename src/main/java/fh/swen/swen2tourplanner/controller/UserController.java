@@ -26,13 +26,21 @@ class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<Long> login(@RequestBody UserDTO userDTO) {
-        User user = userService.login(userDTO.username(), userDTO.password());
-        return ResponseEntity.ok(user.getId());
+        try {
+            User user = userService.login(userDTO.username(), userDTO.password());
+            return ResponseEntity.ok(user.getId());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(401).build();
+        }
     }
 
     @GetMapping("/getId/{username}")
     public ResponseEntity<Long> getUserIdFromUsername(@PathVariable String username) {
-        Long userId = userService.getUserIdFromUsername(username);
-        return ResponseEntity.ok(userId);
+        try {
+            Long userId = userService.getUserIdFromUsername(username);
+            return ResponseEntity.ok(userId);
+        } catch (NullPointerException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

@@ -26,25 +26,41 @@ class TourController {
 
     @GetMapping("/{tourId}")
     public ResponseEntity<TourDTO> getById(@PathVariable Long tourId) {
-        return ResponseEntity.ok(TourDTO.fromEntity(tourService.getById(tourId)));
+        try {
+            return ResponseEntity.ok(TourDTO.fromEntity(tourService.getById(tourId)));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping("/create")
     public ResponseEntity<TourDTO> createTour(@RequestBody TourDTO tour) {
-        TourDTO createdTour = TourDTO.fromEntity(tourService.createTour(tour));
-        return ResponseEntity.ok(createdTour);
+        try {
+            TourDTO createdTour = TourDTO.fromEntity(tourService.createTour(tour));
+            return ResponseEntity.status(201).body(createdTour);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PutMapping("/{tourId}")
     public ResponseEntity<TourDTO> update(@PathVariable Long tourId, @RequestBody TourDTO tourDTO) {
-        TourDTO updatedDTO = TourDTO.fromEntity(tourService.updateTour(tourId, tourDTO));
-        return ResponseEntity.ok(updatedDTO);
+        try {
+            TourDTO updatedDTO = TourDTO.fromEntity(tourService.updateTour(tourId, tourDTO));
+            return ResponseEntity.ok(updatedDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{tourId}")
     public ResponseEntity<Void> delete(@PathVariable Long tourId) {
-        tourService.deleteTour(tourId);
-        return ResponseEntity.noContent().build();
+        try {
+            tourService.deleteTour(tourId);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/getFromTo")
