@@ -15,7 +15,8 @@ async function register() {
   })
 
   if (response.ok) {
-    auth.login(username.value)
+    const userId = await response.json()
+    auth.login(username.value, userId)
     await router.push("/")
   } else if (response.status === 409) {
     alert('Username is already taken')

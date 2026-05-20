@@ -15,12 +15,12 @@ class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<Long> register(@RequestBody UserDTO userDTO) {
         try {
-            userService.register(userDTO);
-            return ResponseEntity.status(201).body("User registered successfully");
+            User user = userService.register(userDTO);
+            return ResponseEntity.status(201).body(user.getId());
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(409).body(e.getMessage());
+            return ResponseEntity.status(409).build();
         }
     }
 
