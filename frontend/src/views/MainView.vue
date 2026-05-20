@@ -18,7 +18,7 @@ const newTour = ref({
   description: '',
   from: '',
   to: '',
-  transportType: 'BICYCLE',
+  transportType: 'CAR',
 })
 
 async function fetchTours() {
