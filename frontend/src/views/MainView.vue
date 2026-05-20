@@ -1,10 +1,12 @@
 <script setup>
-import {ref, onMounted, watch, computed} from 'vue'
+import {ref, inject, onMounted, watch, computed} from 'vue'
 import router from "@/router/index.js"
 import {useAuthStore} from '@/stores/auth.js'
 import TourListTile from '@/components/TourListTile.vue'
 import {useOpenRoute} from '@/composables/useOpenRoute.js'
-import {useMapping} from "@/composables/useMapping.js";
+import {useMapping} from "@/composables/useMapping.js"
+
+const sidebarOpen = inject('sidebarOpen')
 
 const auth = useAuthStore()
 
@@ -81,6 +83,10 @@ watch(
   },
 )
 
+function closeSidebar() {
+  sidebarOpen.value = false
+}
+
 onMounted(() => {
   fetchTours()
 })
@@ -88,10 +94,12 @@ onMounted(() => {
 
 <template>
   <div class="main-layout">
-    <aside class="sidebar">
+    <div v-if="sidebarOpen" class="sidebar-overlay" @click="sidebarOpen = false"></div>
+    <aside class="sidebar" :class="{ open: sidebarOpen }">
+      <button v-if="sidebarOpen" class="close-sidebar" @click="closeSidebar">&times;</button>
       <div class="sidebar-header">
         <h2>Your Tours</h2>
-        <button @click="router.push('/search')"> Search Tours </button>
+        <button @click="router.push('/search')">Search Tours</button>
       </div>
 
       <form class="tour-form" @submit.prevent="saveTour">
@@ -187,5 +195,58 @@ onMounted(() => {
   padding: 2rem;
   text-align: center;
   color: #999;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+.close-sidebar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    width: 300px;
+    min-width: 300px;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  .detail-panel {
+    width: 100%;
+  }
+
+  .close-sidebar {
+    display: block;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #555;
+    cursor: pointer;
+    padding: 0.3rem 0.6rem;
+    align-self: flex-start;
+  }
+
+  .close-sidebar:hover {
+    color: #e53e3e;
+  }
 }
 </style>

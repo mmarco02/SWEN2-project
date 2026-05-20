@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref, computed} from 'vue'
+import {onMounted, ref, computed, inject} from 'vue'
 import {useRoute} from 'vue-router'
 import router from '@/router/index.js'
 import {useAuthStore} from '@/stores/auth.js'
@@ -9,6 +9,11 @@ import {useOpenRoute} from '@/composables/useOpenRoute.js'
 import {useMapping} from "@/composables/useMapping.js";
 
 const { getCoordsFromLocationName } = useOpenRoute()
+const sidebarOpen = inject('sidebarOpen')
+
+function closeSidebar() {
+  sidebarOpen.value = false
+}
 
 const route = useRoute()
 const auth = useAuthStore()
@@ -113,8 +118,10 @@ const estimatedTime = computed(() => {
   <div v-else-if="!tour" class="loading">Tour not found.</div>
 
   <div v-else class="detail-layout">
-    <div class="detail-sidebar">
+    <div v-if="sidebarOpen" class="sidebar-overlay" @click="closeSidebar"></div>
+    <div class="detail-sidebar" :class="{ open: sidebarOpen }">
       <div class="top-bar">
+        <button class="close-sidebar-btn" @click="closeSidebar">&times;</button>
         <button class="back-btn" @click="router.push('/')">&#8592; Back</button>
         <button class="delete-tour-btn" @click="deleteTour">Delete Tour</button>
       </div>
@@ -220,6 +227,7 @@ const estimatedTime = computed(() => {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  z-index: 10;
 }
 
 .top-bar {
@@ -403,6 +411,60 @@ const estimatedTime = computed(() => {
 
 .map-panel {
   flex: 1;
+  z-index: 0;
   position: relative;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+.close-sidebar-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #555;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+}
+
+.close-sidebar-btn:hover {
+  color: #e53e3e;
+}
+
+@media (max-width: 768px) {
+  .detail-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    width: 320px;
+    min-width: 320px;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+
+  .detail-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  .close-sidebar-btn {
+    display: block;
+  }
+
+  .map-panel {
+    width: 100%;
+    z-index: -1;
+  }
 }
 </style>

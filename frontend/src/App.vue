@@ -1,12 +1,16 @@
 <script setup>
 import { RouterView, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.js'
+import { provide, ref } from 'vue'
 
 const auth = useAuthStore()
+const sidebarOpen = ref(false)
+provide('sidebarOpen', sidebarOpen)
 </script>
 
 <template>
   <nav class="navbar">
+    <button class="menu-toggle" @click="sidebarOpen = !sidebarOpen">&#9776;</button>
     <RouterLink to="/" class="nav-main">Tour Planner</RouterLink>
     <div class="nav-links">
       <RouterLink to="/">Home</RouterLink>
@@ -107,8 +111,28 @@ button:hover {
 }
  */
 
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+}
+
+.menu-toggle:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
 .content {
   display: flex;
   flex: 1;
+}
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
 }
 </style>
