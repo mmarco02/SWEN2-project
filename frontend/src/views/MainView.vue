@@ -1,7 +1,8 @@
 <script setup>
-import {ref} from 'vue'
-import router from "@/router/index.js";
+import {ref, onMounted} from 'vue'
+import router from "@/router/index.js"
 import {useAuthStore} from '@/stores/auth.js'
+import TourListTile from '@/components/TourListTile.vue'
 
 const auth = useAuthStore()
 
@@ -10,13 +11,29 @@ if (!auth.isLoggedIn) {
 }
 
 const tours = ref([])
+const selectedTour = ref(null)
 
 const newTour = ref({
   name: '',
   description: '',
   from: '',
   to: '',
-  transportType: 'bike',
+  transportType: 'BICYCLE',
+})
+
+async function fetchTours() {
+  try {
+    const res = await fetch('/tours/users/' + auth.userId)
+    if (res.ok) {
+      tours.value = await res.json()
+    }
+  } catch (e) {
+    console.error('Failed to fetch tours', e)
+  }
+}
+
+onMounted(() => {
+  fetchTours()
 })
 </script>
 
@@ -34,19 +51,27 @@ const newTour = ref({
         <input v-model="newTour.to" placeholder="To">
         <textarea v-model="newTour.description" placeholder="Description" rows="2"></textarea>
         <select v-model="newTour.transportType">
-          <option value="1" selected="selected">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
+          <option value="CAR">Car</option>
+          <option value="BICYCLE">Bicycle</option>
+          <option value="WALKING">Walking</option>
+          <option value="BUS">Bus</option>
         </select>
         <button>Add Tour</button>
       </div>
     </aside>
 
     <section class="detail-panel">
-      <span> MAP Placeholder </span>
+      <div class="tour-list">
+        <TourListTile
+            v-for="tour in tours"
+            :key="tour.id"
+            :tour="tour"
+            @select="selectedTour = $event"
+        />
+        <p v-if="tours.length === 0" class="empty-state">No tours yet.</p>
+      </div>
     </section>
   </div>
-
 </template>
 
 <style scoped>
@@ -90,9 +115,16 @@ const newTour = ref({
 .detail-panel {
   flex: 1;
   overflow-y: auto;
-  padding: 1.5rem;
+}
+
+.tour-list {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+}
+
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  color: #999;
 }
 </style>
