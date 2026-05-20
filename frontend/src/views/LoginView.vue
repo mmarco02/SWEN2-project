@@ -15,7 +15,8 @@ async function login() {
   })
 
   if (response.ok) {
-    auth.login(username.value)
+    const userId = await response.text()
+    auth.login(username.value, userId)
     await router.push("/")
   } else {
     alert('Login failed')
