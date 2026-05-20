@@ -24,6 +24,11 @@ class TourController {
         return ResponseEntity.ok(allTours);
     }
 
+    @GetMapping("/{tourId}")
+    public ResponseEntity<TourDTO> getById(@PathVariable Long tourId) {
+        return ResponseEntity.ok(TourDTO.fromEntity(tourService.getById(tourId)));
+    }
+
     @PostMapping("/create")
     public ResponseEntity<TourDTO> createTour(@RequestBody TourDTO tour) {
         TourDTO createdTour = TourDTO.fromEntity(tourService.createTour(tour));
