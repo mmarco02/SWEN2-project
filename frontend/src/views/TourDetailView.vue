@@ -79,6 +79,13 @@ async function addLog() {
   }
 }
 
+async function deleteTour() {
+  const res = await fetch('/tours/' + route.params.id, { method: 'DELETE' })
+  if (res.ok) {
+    router.push('/')
+  }
+}
+
 async function deleteLog(logId) {
   const res = await fetch('/tours/' + route.params.id + '/logs/' + logId, { method: 'DELETE' })
   if (res.ok) {
@@ -107,7 +114,10 @@ const estimatedTime = computed(() => {
 
   <div v-else class="detail-layout">
     <div class="detail-sidebar">
-      <button class="back-btn" @click="router.push('/')">&#8592; Back</button>
+      <div class="top-bar">
+        <button class="back-btn" @click="router.push('/')">&#8592; Back</button>
+        <button class="delete-tour-btn" @click="deleteTour">Delete Tour</button>
+      </div>
 
       <div class="tour-info">
         <div class="tour-header">
@@ -212,11 +222,17 @@ const estimatedTime = computed(() => {
   overflow-y: auto;
 }
 
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+}
+
 .back-btn {
   padding: 0.6rem 1rem;
   background: none;
   border: none;
-  border-bottom: 1px solid #ddd;
   text-align: left;
   font-size: 0.9rem;
   cursor: pointer;
@@ -225,6 +241,22 @@ const estimatedTime = computed(() => {
 
 .back-btn:hover {
   background: #eef1f7;
+}
+
+.delete-tour-btn {
+  padding: 0.4rem 0.8rem;
+  margin-right: 0.5rem;
+  background: none;
+  border: 1px solid #e53e3e;
+  border-radius: 4px;
+  color: #e53e3e;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.delete-tour-btn:hover {
+  background: #e53e3e;
+  color: white;
 }
 
 .tour-info {

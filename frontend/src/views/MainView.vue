@@ -121,6 +121,7 @@ onMounted(() => {
             :key="tour.id"
             :tour="tour"
             @select="selectedTour = $event"
+            @deleted="fetchTours"
         />
         <p v-if="tours.length === 0" class="empty-state">No tours yet.</p>
       </div>

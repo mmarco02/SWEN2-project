@@ -7,30 +7,51 @@ const props = defineProps({
     required: true,
   },
 })
+
+const emit = defineEmits(['deleted'])
+
+async function deleteTour() {
+  const res = await fetch('/tours/' + props.tour.id, { method: 'DELETE' })
+  if (res.ok) {
+    emit('deleted')
+  }
+}
+
 </script>
 
 <template>
-  <div class="tour-tile" @click="router.push('/tour/' + tour.id)">
-    <div class="tour-tile-header">
-      <h4>{{ tour.name }}</h4>
-      <span class="transport-badge">{{ tour.transportType }}</span>
-    </div>
-    <p class="tour-route">{{ tour.fromLocation }} &rarr; {{ tour.toLocation }}</p>
-    <p v-if="tour.userUsername" class="tour-author">by {{ tour.userUsername }}</p>
-    <p v-if="tour.description" class="tour-description">{{ tour.description }}</p>
-    <div class="tour-meta">
-      <span v-if="tour.distanceKm">{{ tour.distanceKm }} km</span>
-      <span v-if="tour.estimatedTime">{{ tour.estimatedTime }} min</span>
+  <div class="tour-tile-wrapper">
+    <div class="tour-tile" @click="router.push('/tour/' + tour.id)">
+      <div class="tour-tile-header">
+        <h4>{{ tour.name }}</h4>
+        <span class="transport-badge">{{ tour.transportType }}</span>
+        <button class="delete-btn" @click.stop="deleteTour">Delete</button>
+      </div>
+      <p class="tour-route">{{ tour.fromLocation }} &rarr; {{ tour.toLocation }}</p>
+      <p v-if="tour.userUsername" class="tour-author">by {{ tour.userUsername }}</p>
+      <p v-if="tour.description" class="tour-description">{{ tour.description }}</p>
+      <div class="tour-meta">
+        <span v-if="tour.distanceKm">{{ tour.distanceKm }} km</span>
+        <span v-if="tour.estimatedTime">{{ tour.estimatedTime }} min</span>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.tour-tile-wrapper {
+  display: flex;
+  flex-direction: row;
+}
+
 .tour-tile {
+  display: flex;
+  flex-direction: column;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #e0e0e0;
   cursor: pointer;
   transition: background 0.15s;
+  width: 100%;
 }
 
 .tour-tile:hover {
@@ -84,5 +105,21 @@ const props = defineProps({
   font-size: 0.75rem;
   color: #888;
   margin-top: 0.25rem;
+}
+
+.delete-btn {
+  margin-left: auto;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.65rem;
+  background: none;
+  border: 1px solid #e53e3e;
+  border-radius: 3px;
+  color: #e53e3e;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background: #e53e3e;
+  color: white;
 }
 </style>
