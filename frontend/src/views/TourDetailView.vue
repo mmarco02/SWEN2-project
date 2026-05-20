@@ -23,9 +23,10 @@ const newLog = ref({
   comment: '',
   difficulty: 'MEDIUM',
   totalDistance: 0,
-  totalTime: 0,
   rating: 3,
 })
+const logTimeHours = ref(0)
+const logTimeMinutes = ref(0)
 
 onMounted(async () => {
   await fetchTour()
@@ -61,6 +62,7 @@ async function addLog() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       ...newLog.value,
+      totalTime: hrsAndMinsToMinutes(logTimeHours.value, logTimeMinutes.value),
       dateTime: new Date().toISOString(),
       tourId: Number(route.params.id),
       userId: Number(auth.userId),
@@ -69,7 +71,9 @@ async function addLog() {
   if (res.ok) {
     await fetchLogs()
     showLogForm.value = false
-    newLog.value = { comment: '', difficulty: 'MEDIUM', totalDistance: 0, totalTime: 0, rating: 3 }
+    newLog.value = { comment: '', difficulty: 'MEDIUM', totalDistance: 0, rating: 3 }
+    logTimeHours.value = 0
+    logTimeMinutes.value = 0
   }
 }
 
@@ -86,7 +90,7 @@ function formatDate(dateTime) {
   })
 }
 
-const { minutesToHrsAndMins } = useMapping()
+const { minutesToHrsAndMins, hrsAndMinsToMinutes } = useMapping()
 const estimatedTime = computed(() => {
   if (!tour.value?.estimatedTime) return { hours: 0, minutes: 0 }
   return minutesToHrsAndMins(tour.value.estimatedTime)
@@ -150,8 +154,12 @@ const estimatedTime = computed(() => {
               <input v-model.number="newLog.totalDistance" type="number" step="0.1" min="0">
             </label>
             <label>
+              Time (h)
+              <input v-model.number="logTimeHours" type="number" min="0">
+            </label>
+            <label>
               Time (min)
-              <input v-model.number="newLog.totalTime" type="number" min="0">
+              <input v-model.number="logTimeMinutes" type="number" min="0" max="59">
             </label>
           </div>
           <button type="submit">Save Log</button>
