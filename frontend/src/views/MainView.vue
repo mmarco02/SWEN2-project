@@ -1,8 +1,9 @@
 <script setup>
-import {ref, onMounted} from 'vue'
+import {ref, onMounted, watch} from 'vue'
 import router from "@/router/index.js"
 import {useAuthStore} from '@/stores/auth.js'
 import TourListTile from '@/components/TourListTile.vue'
+import {useOpenRoute} from '@/composables/useOpenRoute.js'
 
 const auth = useAuthStore()
 
@@ -32,6 +33,44 @@ async function fetchTours() {
   }
 }
 
+async function saveTour() {
+  const res = await fetch('/tours/create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: newTour.value.name,
+      description: newTour.value.description,
+      fromLocation: newTour.value.from,
+      toLocation: newTour.value.to,
+      transportType: newTour.value.transportType,
+      distanceKm: routeEstimate.value?.distanceKm ?? 0,
+      estimatedTime: routeEstimate.value?.estimatedTimeMin ?? 0,
+      userId: Number(auth.userId),
+    }),
+  })
+  if (res.ok) {
+    await fetchTours()
+    newTour.value = { name: '', description: '', from: '', to: '', transportType: 'CAR' }
+    routeEstimate.value = null
+  }
+}
+
+const { getDistanceAndTime } = useOpenRoute()
+const routeEstimate = ref(null)
+
+let estimateTimeout = null
+watch(
+  () => [newTour.value.from, newTour.value.to, newTour.value.transportType],
+  ([from, to, transportType]) => {
+    routeEstimate.value = null
+    clearTimeout(estimateTimeout)
+    if (!from || !to) return
+    estimateTimeout = setTimeout(async () => {
+      routeEstimate.value = await getDistanceAndTime(from, to, transportType)
+    }, 500)
+  },
+)
+
 onMounted(() => {
   fetchTours()
 })
@@ -44,20 +83,24 @@ onMounted(() => {
         <h2>Tours</h2>
       </div>
 
-      <div class="tour-form">
+      <form class="tour-form" @submit.prevent="saveTour">
         <h3>New Tour</h3>
-        <input v-model="newTour.name" placeholder="Tour name">
-        <input v-model="newTour.from" placeholder="From">
-        <input v-model="newTour.to" placeholder="To">
+        <input v-model="newTour.name" placeholder="Tour name" required="required">
+        <input v-model="newTour.from" placeholder="From" required="required">
+        <input v-model="newTour.to" placeholder="To" required="required">
         <textarea v-model="newTour.description" placeholder="Description" rows="2"></textarea>
-        <select v-model="newTour.transportType">
+        <select v-model="newTour.transportType" required="required">
           <option value="CAR">Car</option>
           <option value="BICYCLE">Bicycle</option>
           <option value="WALKING">Walking</option>
           <option value="BUS">Bus</option>
         </select>
-        <button>Add Tour</button>
-      </div>
+        <div v-if="routeEstimate">
+          <span>Estimated Time: {{ routeEstimate.estimatedTimeMin }} min</span>
+          <span>Estimated Distance: {{ routeEstimate.distanceKm }} km</span>
+        </div>
+        <button type="submit">Add Tour</button>
+      </form>
     </aside>
 
     <section class="detail-panel">
