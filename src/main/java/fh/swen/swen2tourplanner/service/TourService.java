@@ -5,6 +5,7 @@ import fh.swen.swen2tourplanner.domain.User;
 import fh.swen.swen2tourplanner.dto.TourDTO;
 import fh.swen.swen2tourplanner.persistence.TourRepository;
 import fh.swen.swen2tourplanner.persistence.UserRepository;
+import fh.swen.swen2tourplanner.service.mappers.TourMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.List;
 public class TourService {
     private final TourRepository tourRepository;
     private final UserRepository userRepository;
+    private final TourMapper tourMapper;
 
     public List<Tour> getAll() {
         log.debug("Fetching all tours");
@@ -39,7 +41,7 @@ public class TourService {
                     return new IllegalArgumentException("User not found");
                 });
 
-        Tour tour = dto.toEntity();
+        Tour tour = tourMapper.mapToEntity(dto);
         tour.setUser(user);
 
         Tour saved = tourRepository.save(tour);

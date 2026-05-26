@@ -3,10 +3,7 @@ package fh.swen.swen2tourplanner.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import fh.swen.swen2tourplanner.domain.enums.TransportType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
@@ -17,6 +14,7 @@ import java.util.List;
 @Table(name = "tours")
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Indexed
