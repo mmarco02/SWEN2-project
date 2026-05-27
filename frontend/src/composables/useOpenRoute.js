@@ -32,6 +32,16 @@ export function useOpenRoute() {
     return data.features?.[0]?.properties?.label || null
   }
 
+  async function getAutocomplete(text) {
+    if (!text || text.length < 2) return []
+    const res = await fetch(
+        `${BASE_URL}/geocode/autocomplete?api_key=${API_KEY}&text=${encodeURIComponent(text)}`
+    )
+    if (!res.ok) return []
+    const data = await res.json()
+    return (data.features || []).map(f => f.properties?.label).filter(Boolean)
+  }
+
   async function getRoute(start, end, transportType = 'CAR') {
     const profile = getProfile(transportType)
     const res = await fetch(`${BASE_URL}/v2/directions/${profile}/geojson`, {
@@ -77,6 +87,7 @@ export function useOpenRoute() {
   return {
     getCoordsFromLocationName,
     getLocationNameFromCoords,
+    getAutocomplete,
     getRoute,
     getDistanceAndTime,
   }
