@@ -43,14 +43,21 @@ function onImageSelected(event) {
 }
 
 async function saveTour() {
+  formError.value = ''
+
+  if (newTour.value.from.trim() === newTour.value.to.trim()) {
+    formError.value = 'From and To cannot be the same'
+    return
+  }
+
   const res = await fetch('/tours/create', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
-      name: newTour.value.name,
-      description: newTour.value.description,
-      fromLocation: newTour.value.from,
-      toLocation: newTour.value.to,
+      name: newTour.value.name.trim(),
+      description: newTour.value.description.trim(),
+      fromLocation: newTour.value.from.trim(),
+      toLocation: newTour.value.to.trim(),
       transportType: newTour.value.transportType,
       distanceKm: routeEstimate.value?.distanceKm ?? 0,
       estimatedTime: routeEstimate.value?.estimatedTimeMin ?? 0,
@@ -68,20 +75,26 @@ async function saveTour() {
       })
     }
     await fetchTours()
-    newTour.value = { name: '', description: '', from: '', to: '', transportType: 'CAR' }
+    newTour.value = {name: '', description: '', from: '', to: '', transportType: 'CAR'}
     selectedImage.value = null
     routeEstimate.value = null
+    estimateError.value = ''
+    formError.value = ''
+  } else {
+    formError.value = 'Failed to create tour'
   }
 }
 
-const { getDistanceAndTime } = useOpenRoute()
-const { minutesToHrsAndMins } = useMapping()
+const {getDistanceAndTime} = useOpenRoute()
+const {minutesToHrsAndMins} = useMapping()
 
 const routeEstimate = ref()
 const estimateHours = ref('')
 const estimateMinutes = ref('')
+const estimateError = ref('')
+const formError = ref('')
 
-const { getAutocomplete } = useOpenRoute()
+const {getAutocomplete} = useOpenRoute()
 
 const fromSuggestions = ref([])
 const toSuggestions = ref([])
@@ -144,14 +157,22 @@ watch(
     () => [newTour.value.from, newTour.value.to, newTour.value.transportType],
     ([from, to, transportType]) => {
       routeEstimate.value = null
+      estimateError.value = ''
       clearTimeout(estimateTimeout)
       if (!from || !to) return
       estimateTimeout = setTimeout(async () => {
-        routeEstimate.value = await getDistanceAndTime(from, to, transportType)
-        if (routeEstimate.value) {
-          const {hours, minutes} = minutesToHrsAndMins(routeEstimate.value.estimatedTimeMin)
-          estimateHours.value = hours
-          estimateMinutes.value = minutes
+        const result = await getDistanceAndTime(from, to, transportType)
+        if (result?.error) {
+          estimateError.value = result.error
+          routeEstimate.value = null
+        } else {
+          routeEstimate.value = result
+          estimateError.value = ''
+          if (result) {
+            const {hours, minutes} = minutesToHrsAndMins(result.estimatedTimeMin)
+            estimateHours.value = hours
+            estimateMinutes.value = minutes
+          }
         }
       }, 500)
     },
@@ -185,7 +206,8 @@ onMounted(() => {
           <ul v-if="showFromSuggestions" class="autocomplete-list">
             <li v-for="s in fromSuggestions" :key="s" tabindex="0"
                 @click="selectFromSuggestion(s)"
-                @keydown.enter.prevent="selectFromSuggestion(s)">{{ s }}</li>
+                @keydown.enter.prevent="selectFromSuggestion(s)">{{ s }}
+            </li>
           </ul>
         </div>
         <div class="autocomplete-wrapper" @focusout="onToFocusOut">
@@ -194,7 +216,8 @@ onMounted(() => {
           <ul v-if="showToSuggestions" class="autocomplete-list">
             <li v-for="s in toSuggestions" :key="s" tabindex="0"
                 @click="selectToSuggestion(s)"
-                @keydown.enter.prevent="selectToSuggestion(s)">{{ s }}</li>
+                @keydown.enter.prevent="selectToSuggestion(s)">{{ s }}
+            </li>
           </ul>
         </div>
         <textarea v-model="newTour.description" placeholder="Description" rows="2"></textarea>
@@ -208,10 +231,21 @@ onMounted(() => {
           Upload image
           <input type="file" accept="image/*" class="image-upload" @change="onImageSelected">
         </label>
-        <div class="route-estimation" v-if="routeEstimate">
-          <span>Estimated Time: {{ estimateHours }} h {{ estimateMinutes }} min</span>
-          <span>Estimated Distance: {{ routeEstimate.distanceKm }} km</span>
+        <div class="route-estimation">
+          <span class="estimate-info">Route estimation only works for distances under 6000 km</span>
+          <div v-if="estimateError" class="estimate-error">{{ estimateError }}</div>
+          <div class="estimate-row">
+            <span>Estimated Time:</span>
+            <span v-if="routeEstimate">{{ estimateHours }} h {{ estimateMinutes }} min</span>
+            <span class="no-est" v-else>No Estimation Yet...</span>
+          </div>
+          <div class="estimate-row">
+            <span>Estimated Distance:</span>
+            <span v-if="routeEstimate">{{ routeEstimate.distanceKm }} km</span>
+            <span class="no-est" v-else>No Estimation Yet...</span>
+          </div>
         </div>
+        <div v-if="formError" class="form-error">{{ formError }}</div>
         <button type="submit">Add Tour</button>
       </form>
     </aside>
@@ -282,7 +316,38 @@ onMounted(() => {
 .route-estimation {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.5rem;
+  background: #f0f0f0;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.estimate-info {
+  font-size: 0.75rem;
+  color: #888;
+  font-style: italic;
+}
+
+.estimate-error {
+  font-size: 0.8rem;
+  color: #e53e3e;
+}
+
+.estimate-row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.no-est {
+  color: #444;
+  opacity: 0.6;
+}
+
+.form-error {
+  font-size: 0.8rem;
+  color: #e53e3e;
+  padding: 0.3rem 0;
 }
 
 .empty-state {
