@@ -127,22 +127,34 @@ function selectToSuggestion(label) {
   showToSuggestions.value = false
 }
 
+function onFromFocusOut(e) {
+  if (!e.currentTarget.contains(e.relatedTarget)) {
+    showFromSuggestions.value = false
+  }
+}
+
+function onToFocusOut(e) {
+  if (!e.currentTarget.contains(e.relatedTarget)) {
+    showToSuggestions.value = false
+  }
+}
+
 let estimateTimeout = null
 watch(
-  () => [newTour.value.from, newTour.value.to, newTour.value.transportType],
-  ([from, to, transportType]) => {
-    routeEstimate.value = null
-    clearTimeout(estimateTimeout)
-    if (!from || !to) return
-    estimateTimeout = setTimeout(async () => {
-      routeEstimate.value = await getDistanceAndTime(from, to, transportType)
-      if (routeEstimate.value) {
-        const { hours, minutes } = minutesToHrsAndMins(routeEstimate.value.estimatedTimeMin)
-        estimateHours.value = hours
-        estimateMinutes.value = minutes
-      }
-    }, 500)
-  },
+    () => [newTour.value.from, newTour.value.to, newTour.value.transportType],
+    ([from, to, transportType]) => {
+      routeEstimate.value = null
+      clearTimeout(estimateTimeout)
+      if (!from || !to) return
+      estimateTimeout = setTimeout(async () => {
+        routeEstimate.value = await getDistanceAndTime(from, to, transportType)
+        if (routeEstimate.value) {
+          const {hours, minutes} = minutesToHrsAndMins(routeEstimate.value.estimatedTimeMin)
+          estimateHours.value = hours
+          estimateMinutes.value = minutes
+        }
+      }, 500)
+    },
 )
 
 function closeSidebar() {
@@ -167,18 +179,22 @@ onMounted(() => {
       <form class="tour-form" @submit.prevent="saveTour()">
         <h3>New Tour</h3>
         <input v-model="newTour.name" placeholder="Tour name" required="required">
-        <div class="autocomplete-wrapper">
+        <div class="autocomplete-wrapper" @focusout="onFromFocusOut">
           <input v-model="newTour.from" placeholder="From" required="required"
-                 @input="onFromInput" @blur="setTimeout(() => showFromSuggestions = false, 150)">
+                 @input="onFromInput">
           <ul v-if="showFromSuggestions" class="autocomplete-list">
-            <li tabindex="0" v-for="s in fromSuggestions" :key="s" @mousedown="selectFromSuggestion(s)">{{ s }}</li>
+            <li v-for="s in fromSuggestions" :key="s" tabindex="0"
+                @click="selectFromSuggestion(s)"
+                @keydown.enter.prevent="selectFromSuggestion(s)">{{ s }}</li>
           </ul>
         </div>
-        <div class="autocomplete-wrapper">
+        <div class="autocomplete-wrapper" @focusout="onToFocusOut">
           <input v-model="newTour.to" placeholder="To" required="required"
-                 @input="onToInput" @blur="setTimeout(() => showToSuggestions = false, 150)">
+                 @input="onToInput">
           <ul v-if="showToSuggestions" class="autocomplete-list">
-            <li tabindex="0" v-for="s in toSuggestions" :key="s" @mousedown="selectToSuggestion(s)">{{ s }}</li>
+            <li v-for="s in toSuggestions" :key="s" tabindex="0"
+                @click="selectToSuggestion(s)"
+                @keydown.enter.prevent="selectToSuggestion(s)">{{ s }}</li>
           </ul>
         </div>
         <textarea v-model="newTour.description" placeholder="Description" rows="2"></textarea>
@@ -321,8 +337,10 @@ onMounted(() => {
   color: #333;
 }
 
-.autocomplete-list li:hover {
+.autocomplete-list li:hover,
+.autocomplete-list li:focus {
   background: #eef1f7;
+  outline: none;
 }
 
 @media (max-width: 768px) {
