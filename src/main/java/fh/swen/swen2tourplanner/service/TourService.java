@@ -77,7 +77,6 @@ public class TourService {
         existing.setDistanceKm(dto.distanceKm());
         existing.setEstimatedTime(dto.estimatedTime());
         existing.setRoute(dto.route());
-        existing.setImagePath(dto.imagePath());
 
         Tour saved = tourRepository.save(existing);
         log.info("Tour updated: id={}", saved.getId());

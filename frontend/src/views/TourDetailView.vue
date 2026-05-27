@@ -1,5 +1,5 @@
 <script setup>
-import {onMounted, ref, computed, inject} from 'vue'
+import {onMounted, onBeforeUnmount, ref, computed, inject} from 'vue'
 import {useRoute} from 'vue-router'
 import router from '@/router/index.js'
 import {useAuthStore} from '@/stores/auth.js'
@@ -47,6 +47,12 @@ onMounted(async () => {
     endCoords.value = end
   }
   loading.value = false
+})
+
+onBeforeUnmount(() => {
+  if (imageUrl.value) {
+    URL.revokeObjectURL(imageUrl.value)
+  }
 })
 
 async function fetchTour() {
