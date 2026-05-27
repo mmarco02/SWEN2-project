@@ -19,6 +19,7 @@ public class TourMapper extends AbstractMapper<Tour, TourDTO> {
                 tour.getDistanceKm(),
                 tour.getEstimatedTime(),
                 tour.getRoute(),
+                tour.getImagePath(),
                 tour.getUser().getId(),
                 tour.getUser().getUsername()
         );
@@ -36,6 +37,7 @@ public class TourMapper extends AbstractMapper<Tour, TourDTO> {
                 .distanceKm(dto.distanceKm())
                 .estimatedTime(dto.estimatedTime())
                 .route(dto.route())
+                .imagePath(dto.imagePath())
                 .build();
     }
 }

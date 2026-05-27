@@ -53,6 +53,9 @@ public class Tour {
     @Column
     private String route;
 
+    @Column
+    private String imagePath;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

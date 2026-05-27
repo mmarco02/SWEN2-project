@@ -36,6 +36,12 @@ async function fetchTours() {
   }
 }
 
+const selectedImage = ref(null)
+
+function onImageSelected(event) {
+  selectedImage.value = event.target.files[0] || null
+}
+
 async function saveTour() {
   const res = await fetch('/tours/create', {
     method: 'POST',
@@ -52,8 +58,18 @@ async function saveTour() {
     }),
   })
   if (res.ok) {
+    const createdTour = await res.json()
+    if (selectedImage.value) {
+      const formData = new FormData()
+      formData.append('file', selectedImage.value)
+      await fetch(`/tours/${createdTour.id}/image`, {
+        method: 'POST',
+        body: formData,
+      })
+    }
     await fetchTours()
     newTour.value = { name: '', description: '', from: '', to: '', transportType: 'CAR' }
+    selectedImage.value = null
     routeEstimate.value = null
   }
 }
@@ -102,7 +118,7 @@ onMounted(() => {
         <button @click="router.push('/search')">Search Tours</button>
       </div>
 
-      <form class="tour-form" @submit.prevent="saveTour">
+      <form class="tour-form" @submit.prevent="saveTour()">
         <h3>New Tour</h3>
         <input v-model="newTour.name" placeholder="Tour name" required="required">
         <input v-model="newTour.from" placeholder="From" required="required">
@@ -114,6 +130,10 @@ onMounted(() => {
           <option value="WALKING">Walking</option>
           <option value="BUS">Bus</option>
         </select>
+        <label class="image-upload-label">
+          Upload image
+          <input type="file" accept="image/*" class="image-upload" @change="onImageSelected">
+        </label>
         <div class="route-estimation" v-if="routeEstimate">
           <span>Estimated Time: {{ estimateHours }} h {{ estimateMinutes }} min</span>
           <span>Estimated Distance: {{ routeEstimate.distanceKm }} km</span>
@@ -203,6 +223,10 @@ onMounted(() => {
 
 .close-sidebar {
   display: none;
+}
+
+.image-upload {
+  width: 100%;
 }
 
 @media (max-width: 768px) {

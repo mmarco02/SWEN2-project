@@ -12,6 +12,7 @@ public record TourDTO(
         double distanceKm,
         Integer estimatedTime,
         String route,
+        String imagePath,
         Long userId,
         String userUsername
 ) {

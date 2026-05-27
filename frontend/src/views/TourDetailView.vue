@@ -23,6 +23,7 @@ const loading = ref(true)
 const showLogForm = ref(false)
 const startCoords = ref(null)
 const endCoords = ref(null)
+const imageUrl = ref(null)
 
 const newLog = ref({
   comment: '',
@@ -36,7 +37,7 @@ const logDate = ref(new Date().toISOString().slice(0, 10))
 
 onMounted(async () => {
   await fetchTour()
-  await fetchLogs()
+  await Promise.all([fetchLogs(), fetchImage()])
   if (tour.value) {
     const [start, end] = await Promise.all([
       getCoordsFromLocationName(tour.value.fromLocation),
@@ -59,6 +60,14 @@ async function fetchLogs() {
   const res = await fetch('/tours/' + route.params.id + '/logs')
   if (res.ok) {
     logs.value = await res.json()
+  }
+}
+
+async function fetchImage() {
+  const res = await fetch('/tours/' + route.params.id + '/image')
+  if (res.ok) {
+    const blob = await res.blob()
+    imageUrl.value = URL.createObjectURL(blob)
   }
 }
 
@@ -138,6 +147,7 @@ const estimatedTime = computed(() => {
           <span v-if="tour.distanceKm"><strong>Distance:</strong> {{ tour.distanceKm }} km</span>
           <span v-if="tour.estimatedTime"><strong>Est. time:</strong> {{ estimatedTime.hours }} h {{ estimatedTime.minutes }} min</span>
         </div>
+        <img v-if="imageUrl" :src="imageUrl" alt="Tour image" class="tour-image">
       </div>
 
       <div class="logs-section">
@@ -316,6 +326,14 @@ const estimatedTime = computed(() => {
   font-size: 0.85rem;
   color: #555;
   margin-top: 0.5rem;
+}
+
+.tour-image {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-top: 0.75rem;
 }
 
 .logs-section {

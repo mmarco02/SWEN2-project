@@ -38,9 +38,10 @@ html, body {
 #app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
   font-family: Roboto, sans-serif;
   color: #333;
+  overflow: hidden;
 }
 
 input, select, textarea {
@@ -128,6 +129,7 @@ button:hover {
 .content {
   display: flex;
   flex: 1;
+  overflow: hidden;
 }
 
 @media (max-width: 768px) {
