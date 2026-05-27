@@ -59,8 +59,10 @@ export function useOpenRoute() {
     })
     if (!res.ok) {
       const err = await res.json().catch(() => null)
-      const msg = err?.error?.message || 'Route calculation failed'
-      return { error: msg }
+      if (err?.error?.code === 2004) {
+        return { error: 'Route is too long (max 6000 km)' }
+      }
+      return { error: 'Route calculation failed' }
     }
     const data = await res.json()
     const segment = data.features?.[0]?.properties?.segments?.[0]
