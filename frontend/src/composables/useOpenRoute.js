@@ -57,7 +57,11 @@ export function useOpenRoute() {
         ],
       }),
     })
-    if (!res.ok) return null
+    if (!res.ok) {
+      const err = await res.json().catch(() => null)
+      const msg = err?.error?.message || 'Route calculation failed'
+      return { error: msg }
+    }
     const data = await res.json()
     const segment = data.features?.[0]?.properties?.segments?.[0]
     return {
@@ -72,9 +76,9 @@ export function useOpenRoute() {
       getCoordsFromLocationName(fromLocation),
       getCoordsFromLocationName(toLocation),
     ])
-    if (!start || !end) return null
+    if (!start || !end) return { error: 'Could not find one or both locations' }
     const route = await getRoute(start, end, transportType)
-    if (!route) return null
+    if (route.error) return { error: route.error }
     return {
       startCoords: start,
       endCoords: end,
