@@ -284,25 +284,6 @@ Datasource initialization is deferred so JPA creates the tables first, then data
 
 The Lucene index is stored at data/index/ and rebuilt on every startup.
 
-## Tracked Time
-
-| Task                                     | Time    |
-|------------------------------------------|---------|
-| Project setup (Spring Boot, Vue, Docker) | 4h      |
-| Database schema and JPA entities         | 2h      |
-| Tour CRUD (backend + frontend)           | 5h      |
-| Tour Log CRUD                            | 3h      |
-| User auth (register/login)               | 3h      |
-| Map integration (Leaflet + ORS)          | 4h      |
-| Image upload/storage                     | 3h      |
-| Full-text search (Hibernate Search)      | 4h      |
-| Location autocomplete                    | 2h      |
-| Responsive UI and styling                | 3h      |
-| Docker Compose setup                     | 2h      |
-| Testing and debugging                    | 3h      |
-| Documentation                            | 2h      |
-| **Total**                                | **~40h**|
-
 ## Version Control (Git)
 
 We use GitHub for hosting the Repo. 
