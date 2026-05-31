@@ -1,7 +1,7 @@
 # SWEN2 Tour Planner
 
 Tour Planner is a full-stack app for creating, managing and searching tours.
-Users can create tours with start/end locations, upload images, get automatic distance and time estimates (via the OpenRouteService API), and add tour logs with ratings, difficulty, distance, time, etc.
+Users can create, edit and delete tours with start/end locations, upload images, see tour images in the list view, get automatic distance and time estimates (via the OpenRouteService API), and create, edit and delete tour logs with ratings, difficulty, distance, time, etc.
 
 **Git Repository:** https://github.com/mmarco02/SWEN2-project
 
@@ -130,7 +130,7 @@ MainView
 The main dashboard. Has the tour creation form with location autocomplete (using geocode/autocomplete), image upload and the tour list.
 
 TourDetailView
-Shows all the tour info (name, route, distance, estimated time, image etc.) in the sidebar and a list of tour logs with the option to add new ones. The right panel shows a Leaflet map with the route on the map.
+Shows all tour info (name, route, distance, estimated time, image etc.) in the sidebar and a list of tour logs. Users can edit the selected tour, replace its image, add new tour logs, edit existing tour logs by clicking them, and delete logs. The right panel shows a Leaflet map with the route on the map.
 
 SearchView
 Full-text search interface. Has a search bar and displays matching tours and tour logs.
@@ -146,10 +146,10 @@ A Leaflet map component. Takes start/end coordinates and transport type as props
 , uses OpenRoure Composable
 
 TourListTile.vue
-A tour card/tile component used in the tour list on the main page.
+A reusable tour card/tile component used in the tour list on the main page. It displays the tour image thumbnail, route, description, transport type, distance, estimated time and delete action.
 
 TourLogTile.vue
-A tour log entry component used in the tour detail page.
+A reusable tour log entry component used in the tour detail page. It displays date, difficulty, comment, distance, time and rating. Clicking a log entry opens the edit form; the delete button removes the log without opening edit mode.
 
 ### Composables
 Reusable JavaScript functions using Vue 3's Composition API.
@@ -185,12 +185,26 @@ The UI is a sidebar and main panel layout.
 
 Main Page
 The sidebar has the tour creation form with inputs for name, from, to (with autocomplete from OpenRouteService), description, transport type and image upload. 
+From and To inputs are validated so numbers are rejected with a browser alert.
 Below the form is a route estimation that calculates distance and time when both locations are filled in. 
-The main panel shows the users tours as tiles.
+The main panel shows the user's tours as tiles with image thumbnails.
 
 Tour Detail Page
-The sidebar shows the tour info (name, transport type, route, author, description, distance, estimated time, image) and tour logs with the option to add new ones. 
+The sidebar shows the tour info (name, transport type, route, author, description, distance, estimated time, image) and tour logs.
+The selected tour can be edited directly in the sidebar, including changing from/to locations, transport type and image.
+Tour logs can be created, edited by clicking an existing log, and deleted.
 The main panel shows a Leaflet map with the route drawn between start and end markers.
+
+## Intermediate Hand-In Features
+
+- Tour CRUD: users can create, edit and delete tours.
+- Tour attributes: tours include name, description, from, to, transport type, distance, estimated time, route information and image.
+- Tour list view: tours are managed in a list and uploaded images are shown as thumbnails.
+- Tour details: selected tours show all required attributes and a Leaflet map.
+- Tour log CRUD: users can create, edit and delete tour logs for a selected tour.
+- Tour log attributes: logs include date/time, comment, difficulty, total distance, total time and rating.
+- Validation: From and To inputs reject numbers with a browser alert to prevent invalid location input.
+- Responsive UI: the sidebar collapses on smaller screens.
 
 Search Page
 Search bar at the top, results split into matched tours and matched tour logs. 
