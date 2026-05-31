@@ -2,10 +2,10 @@ package fh.swen.swen2tourplanner.domain;
 
 import fh.swen.swen2tourplanner.domain.enums.Difficulty;
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -13,10 +13,8 @@ import java.time.LocalDateTime;
 @Table(name = "tour_logs")
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Indexed
 public class TourLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,11 +23,9 @@ public class TourLog {
     @Column(nullable = false)
     private LocalDateTime dateTime;
 
-    @FullTextField
     @Column
     private String comment;
 
-    @KeywordField
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Difficulty difficulty;

@@ -4,23 +4,16 @@ import fh.swen.swen2tourplanner.domain.User;
 import fh.swen.swen2tourplanner.dto.UserDTO;
 import fh.swen.swen2tourplanner.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordHash passwordHash;
 
     public User register(UserDTO dto) {
-        if (userRepository.findByUsername(dto.username()).isPresent()) {
-            throw new IllegalArgumentException("Username already taken");
-        }
         User user = new User();
         user.setUsername(dto.username());
         user.setPassword(passwordHash.hash(dto.password()));
@@ -36,14 +29,5 @@ public class UserService {
         }
 
         return user;
-    }
-
-    public Long getUserIdFromUsername(String username) {
-        Optional<User> user = userRepository.findByUsername(username);
-        if(user.isEmpty()) {
-            throw new NullPointerException("User not found");
-        }
-
-        return user.get().getId();
     }
 }

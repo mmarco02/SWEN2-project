@@ -18,12 +18,16 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/tours': {
-        target: 'http://localhost:8080',
+      '/api': {
+        target: 'http://localhost:8081',
         changeOrigin: true,
       },
       '/users': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:8081/users',
+        changeOrigin: true,
+      },
+      '/tours': {
+        target: 'http://localhost:8081/tours',
         changeOrigin: true,
       },
     },
