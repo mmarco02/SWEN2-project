@@ -49,14 +49,7 @@ const logDate = ref(new Date().toISOString().slice(0, 10))
 onMounted(async () => {
   await fetchTour()
   await Promise.all([fetchLogs(), fetchImage()])
-  if (tour.value) {
-    const [start, end] = await Promise.all([
-      getCoordsFromLocationName(tour.value.fromLocation),
-      getCoordsFromLocationName(tour.value.toLocation),
-    ])
-    startCoords.value = start
-    endCoords.value = end
-  }
+  await refreshTourMap()
   loading.value = false
 })
 
@@ -86,6 +79,119 @@ async function fetchImage() {
     const blob = await res.blob()
     imageUrl.value = URL.createObjectURL(blob)
   }
+}
+async function refreshTourMap() {
+  if (!tour.value) return
+
+  const [start, end] = await Promise.all([
+    getCoordsFromLocationName(tour.value.fromLocation),
+    getCoordsFromLocationName(tour.value.toLocation),
+  ])
+
+  startCoords.value = start
+  endCoords.value = end
+}
+
+function startEditing() {
+  editTour.value = {
+    name: tour.value.name,
+    description: tour.value.description || '',
+    fromLocation: tour.value.fromLocation,
+    toLocation: tour.value.toLocation,
+    transportType: tour.value.transportType,
+  }
+
+  editError.value = ''
+  selectedEditImage.value = null
+  editingTour.value = true
+}
+
+function cancelEditing() {
+  editingTour.value = false
+  editError.value = ''
+  selectedEditImage.value = null
+}
+
+function onEditImageSelected(event) {
+  selectedEditImage.value = event.target.files[0] || null
+}
+
+async function saveTourUpdate() {
+  editError.value = ''
+
+  const fromLocation = editTour.value.fromLocation.trim()
+  const toLocation = editTour.value.toLocation.trim()
+
+  if (fromLocation === toLocation) {
+    editError.value = 'From and To cannot be the same'
+    return
+  }
+
+  let distanceKm = tour.value.distanceKm
+  let estimatedTime = tour.value.estimatedTime
+
+  const routeChanged =
+      fromLocation !== tour.value.fromLocation ||
+      toLocation !== tour.value.toLocation ||
+      editTour.value.transportType !== tour.value.transportType
+
+  if (routeChanged) {
+    const result = await getDistanceAndTime(fromLocation, toLocation, editTour.value.transportType)
+
+    if (result?.error) {
+      editError.value = result.error
+      return
+    }
+
+    distanceKm = result.distanceKm
+    estimatedTime = result.estimatedTimeMin
+  }
+
+  const res = await fetch('/tours/' + route.params.id, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      id: tour.value.id,
+      name: editTour.value.name.trim(),
+      description: editTour.value.description.trim(),
+      fromLocation,
+      toLocation,
+      transportType: editTour.value.transportType,
+      distanceKm,
+      estimatedTime,
+      route: tour.value.route,
+      imagePath: tour.value.imagePath,
+      userId: Number(auth.userId),
+      userUsername: tour.value.userUsername,
+    }),
+  })
+
+  if (!res.ok) {
+    editError.value = 'Failed to update tour'
+    return
+  }
+
+  if (selectedEditImage.value) {
+    const formData = new FormData()
+    formData.append('file', selectedEditImage.value)
+
+    const imageRes = await fetch(`/tours/${route.params.id}/image`, {
+      method: 'POST',
+      body: formData,
+    })
+
+    if (!imageRes.ok) {
+      editError.value = 'Tour updated, but image upload failed'
+      return
+    }
+  }
+
+  await fetchTour()
+  await fetchImage()
+  await refreshTourMap()
+
+  editingTour.value = false
+  selectedEditImage.value = null
 }
 
 async function addLog() {
@@ -154,18 +260,45 @@ const estimatedTime = computed(() => {
       </div>
 
       <div class="tour-info">
-        <div class="tour-header">
-          <h2>{{ tour.name }}</h2>
-          <span class="transport-badge">{{ tour.transportType }}</span>
+        <form v-if="editingTour" class="tour-edit-form" @submit.prevent="saveTourUpdate">
+          <input v-model="editTour.name" required placeholder="Tour name">
+
+          <input v-model="editTour.fromLocation" required placeholder="From">
+          <input v-model="editTour.toLocation" required placeholder="To">
+
+          <textarea v-model="editTour.description" placeholder="Description" rows="3"></textarea>
+
+          <select v-model="editTour.transportType" required>
+            <option value="CAR">Car</option>
+            <option value="BICYCLE">Bicycle</option>
+            <option value="WALKING">Walking</option>
+            <option value="BUS">Bus</option>
+          </select>
+
+          <input type="file" accept="image/*" @change="onEditImageSelected">
+
+          <div v-if="editError" class="edit-error">{{ editError }}</div>
+
+          <div class="edit-actions">
+            <button type="submit">Save Tour</button>
+            <button type="button" @click="cancelEditing">Cancel</button>
+          </div>
+        </form>
+
+        <div v-else>
+          <div class="tour-header">
+            <h2>{{ tour.name }}</h2>
+            <span class="transport-badge">{{ tour.transportType }}</span>
+          </div>
+          <p class="tour-route">{{ tour.fromLocation }} &rarr; {{ tour.toLocation }}</p>
+          <p v-if="tour.userUsername" class="tour-author">by {{ tour.userUsername }}</p>
+          <p v-if="tour.description" class="tour-description">{{ tour.description }}</p>
+          <div class="tour-meta">
+            <span v-if="tour.distanceKm"><strong>Distance:</strong> {{ tour.distanceKm }} km</span>
+            <span v-if="tour.estimatedTime"><strong>Est. time:</strong> {{ estimatedTime.hours }} h {{ estimatedTime.minutes }} min</span>
+          </div>
+          <img v-if="imageUrl" :src="imageUrl" alt="Tour image" class="tour-image">
         </div>
-        <p class="tour-route">{{ tour.fromLocation }} &rarr; {{ tour.toLocation }}</p>
-        <p v-if="tour.userUsername" class="tour-author">by {{ tour.userUsername }}</p>
-        <p v-if="tour.description" class="tour-description">{{ tour.description }}</p>
-        <div class="tour-meta">
-          <span v-if="tour.distanceKm"><strong>Distance:</strong> {{ tour.distanceKm }} km</span>
-          <span v-if="tour.estimatedTime"><strong>Est. time:</strong> {{ estimatedTime.hours }} h {{ estimatedTime.minutes }} min</span>
-        </div>
-        <img v-if="imageUrl" :src="imageUrl" alt="Tour image" class="tour-image">
       </div>
 
       <div class="logs-section">
@@ -294,6 +427,21 @@ const estimatedTime = computed(() => {
   background: #e53e3e;
   color: white;
 }
+.edit-tour-btn {
+  padding: 0.4rem 0.8rem;
+  margin-right: 0.5rem;
+  background: none;
+  border: 1px solid #4a90d9;
+  border-radius: 4px;
+  color: #4a90d9;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.edit-tour-btn:hover {
+  background: #4a90d9;
+  color: white;
+}
 
 .tour-info {
   padding: 1rem;
@@ -358,6 +506,28 @@ const estimatedTime = computed(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
+}
+
+.tour-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tour-edit-form input,
+.tour-edit-form textarea,
+.tour-edit-form select {
+  width: 100%;
+}
+
+.edit-error {
+  font-size: 0.8rem;
+  color: #e53e3e;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .logs-header {
