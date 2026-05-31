@@ -45,6 +45,11 @@ function onImageSelected(event) {
 async function saveTour() {
   formError.value = ''
 
+  if (/\d/.test(newTour.value.from) || /\d/.test(newTour.value.to)) {
+    alert('Numbers are not accepted.')
+    return
+  }
+
   if (newTour.value.from.trim() === newTour.value.to.trim()) {
     formError.value = 'From and To cannot be the same'
     return

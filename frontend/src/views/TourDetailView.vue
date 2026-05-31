@@ -119,6 +119,11 @@ function onEditImageSelected(event) {
 async function saveTourUpdate() {
   editError.value = ''
 
+  if (/\d/.test(fromLocation) || /\d/.test(toLocation)) {
+    alert('Numbers are not accepted in From and To.')
+    return
+  }
+
   const fromLocation = editTour.value.fromLocation.trim()
   const toLocation = editTour.value.toLocation.trim()
 
