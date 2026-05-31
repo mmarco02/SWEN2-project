@@ -5,8 +5,6 @@ COPY frontend/package*.json ./
 RUN npm ci --no-audit
 
 COPY frontend/ ./
-ARG VITE_OPEN_ROUTE_API_KEY
-ENV VITE_OPEN_ROUTE_API_KEY=$VITE_OPEN_ROUTE_API_KEY
 RUN npm run build
 
 FROM nginx:stable-alpine
