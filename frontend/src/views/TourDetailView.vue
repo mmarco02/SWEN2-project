@@ -8,7 +8,7 @@ import TourLogTile from "@/components/TourLogTile.vue";
 import {useOpenRoute} from '@/composables/useOpenRoute.js'
 import {useMapping} from "@/composables/useMapping.js";
 
-const { getCoordsFromLocationName } = useOpenRoute()
+const { getCoordsFromLocationName, getDistanceAndTime } = useOpenRoute()
 const sidebarOpen = inject('sidebarOpen')
 
 function closeSidebar() {
@@ -24,6 +24,17 @@ const showLogForm = ref(false)
 const startCoords = ref(null)
 const endCoords = ref(null)
 const imageUrl = ref(null)
+const editingTour = ref(false)
+const editError = ref('')
+const selectedEditImage = ref(null)
+
+const editTour = ref({
+  name: '',
+  description: '',
+  fromLocation: '',
+  toLocation: '',
+  transportType: 'CAR',
+})
 
 const newLog = ref({
   comment: '',
@@ -139,6 +150,7 @@ const estimatedTime = computed(() => {
         <button class="close-sidebar-btn" @click="closeSidebar">&times;</button>
         <button class="back-btn" @click="router.push('/')">&#8592; Back</button>
         <button class="delete-tour-btn" @click="deleteTour">Delete Tour</button>
+        <button class="edit-tour-btn" @click="startEditing">Edit Tour</button>
       </div>
 
       <div class="tour-info">
