@@ -21,6 +21,12 @@ async function deleteTour() {
 
 <template>
   <div class="tour-tile-wrapper">
+    <img
+        v-if="tour.imagePath"
+        class="tour-thumbnail"
+        :src="'/tours/' + tour.id + '/image'"
+        :alt="tour.name + ' image'"
+    >
     <div class="tour-tile" @click="router.push('/tour/' + tour.id)">
       <div class="tour-tile-header">
         <h4>{{ tour.name }}</h4>
@@ -42,20 +48,36 @@ async function deleteTour() {
 .tour-tile-wrapper {
   display: flex;
   flex-direction: row;
+  align-items: stretch;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .tour-tile {
   display: flex;
   flex-direction: column;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #e0e0e0;
   cursor: pointer;
   transition: background 0.15s;
   width: 100%;
 }
 
-.tour-tile:hover {
+.tour-thumbnail {
+  width: 96px;
+  min-width: 96px;
+  height: 96px;
+  object-fit: cover;
+  align-self: center;
+  margin-left: 0.75rem;
+  border-radius: 6px;
+  background: #ddd;
+}
+
+.tour-tile-wrapper:hover {
   background: #eef1f7;
+}
+
+.tour-tile:hover {
+  background: transparent;
 }
 
 .tour-tile-header {
