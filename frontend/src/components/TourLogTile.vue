@@ -10,7 +10,7 @@ defineProps({
   <div class="log-header">
     <span class="log-date">{{ formatDate }}</span>
     <span class="difficulty-badge" :class="log.difficulty.toLowerCase()">{{ log.difficulty }}</span>
-    <button class="delete-btn" @click="deleteLog">&times;</button>
+    <button class="delete-btn" @click.stop="deleteLog">&times;</button>
   </div>
   <p v-if="log.comment" class="log-comment">{{ log.comment }}</p>
   <div class="log-meta">

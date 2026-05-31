@@ -42,6 +42,19 @@ const newLog = ref({
   totalDistance: 0,
   rating: 3,
 })
+
+const editingLogId = ref(null)
+
+const editLog = ref({
+  comment: '',
+  difficulty: 'MEDIUM',
+  totalDistance: 0,
+  rating: 3,
+})
+
+const editLogTimeHours = ref(0)
+const editLogTimeMinutes = ref(0)
+const editLogDate = ref(new Date().toISOString().slice(0, 16))
 const logTimeHours = ref(0)
 const logTimeMinutes = ref(0)
 const logDate = ref(new Date().toISOString().slice(0, 10))
@@ -221,6 +234,51 @@ async function addLog() {
   }
 }
 
+function startEditingLog(log) {
+  const time = minutesToHrsAndMins(log.totalTime)
+
+  editingLogId.value = log.id
+  editLog.value = {
+    comment: log.comment || '',
+    difficulty: log.difficulty,
+    totalDistance: log.totalDistance,
+    rating: log.rating,
+  }
+
+  editLogTimeHours.value = time.hours
+  editLogTimeMinutes.value = time.minutes
+  editLogDate.value = log.dateTime.slice(0, 16)
+  showLogForm.value = false
+}
+
+function cancelEditingLog() {
+  editingLogId.value = null
+  editLog.value = { comment: '', difficulty: 'MEDIUM', totalDistance: 0, rating: 3 }
+  editLogTimeHours.value = 0
+  editLogTimeMinutes.value = 0
+  editLogDate.value = new Date().toISOString().slice(0, 16)
+}
+
+async function updateLog() {
+  const res = await fetch('/tours/' + route.params.id + '/logs/' + editingLogId.value, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      id: editingLogId.value,
+      ...editLog.value,
+      totalTime: hrsAndMinsToMinutes(editLogTimeHours.value, editLogTimeMinutes.value),
+      dateTime: new Date(editLogDate.value).toISOString(),
+      tourId: Number(route.params.id),
+      userId: Number(auth.userId),
+    }),
+  })
+
+  if (res.ok) {
+    await fetchLogs()
+    cancelEditingLog()
+  }
+}
+
 async function deleteTour() {
   const res = await fetch('/tours/' + route.params.id, { method: 'DELETE' })
   if (res.ok) {
@@ -309,7 +367,7 @@ const estimatedTime = computed(() => {
       <div class="logs-section">
         <div class="logs-header">
           <h3>Tour Logs</h3>
-          <button class="add-log-btn" @click="showLogForm = !showLogForm">
+          <button class="add-log-btn" @click="editingLogId = null; showLogForm = !showLogForm">
             {{ showLogForm ? 'Cancel' : '+ Add Log' }}
           </button>
         </div>
@@ -353,10 +411,59 @@ const estimatedTime = computed(() => {
           </div>
           <button type="submit">Save Log</button>
         </form>
+        <form v-if="editingLogId" class="log-form" @submit.prevent="updateLog">
+          <label>
+            Date
+            <input v-model="editLogDate" type="datetime-local" required>
+          </label>
+
+          <textarea v-model="editLog.comment" placeholder="Comment" rows="2"></textarea>
+
+          <div class="form-row">
+            <label>
+              Difficulty
+              <select v-model="editLog.difficulty">
+                <option value="EASY">Easy</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HARD">Hard</option>
+                <option value="EXPERT">Expert</option>
+              </select>
+            </label>
+
+            <label>
+              Rating
+              <select v-model.number="editLog.rating">
+                <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="form-row">
+            <label>
+              Distance (km)
+              <input v-model.number="editLog.totalDistance" type="number" step="0.1" min="0">
+            </label>
+
+            <label>
+              Time (h)
+              <input v-model.number="editLogTimeHours" type="number" min="0">
+            </label>
+
+            <label>
+              Time (min)
+              <input v-model.number="editLogTimeMinutes" type="number" min="0" max="59">
+            </label>
+          </div>
+
+          <div class="edit-actions">
+            <button type="submit">Save Log</button>
+            <button type="button" @click="cancelEditingLog">Cancel</button>
+          </div>
+        </form>
 
         <div v-if="logs.length === 0 && !showLogForm" class="empty-state">No logs yet.</div>
 
-        <div v-for="log in logs" :key="log.id" class="log-entry">
+        <div v-for="log in logs" :key="log.id" class="log-entry" @click="startEditingLog(log)">
           <TourLogTile :delete-log="() => deleteLog(log.id)" :format-date="formatDate(log.dateTime)"
                         :log="log"/>
         </div>
@@ -618,6 +725,7 @@ const estimatedTime = computed(() => {
 .log-entry {
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #e0e0e0;
+  cursor: pointer;
 }
 
 .map-panel {
