@@ -5,10 +5,7 @@ import fh.swen.swen2tourplanner.dto.UserDTO;
 import fh.swen.swen2tourplanner.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
@@ -18,14 +15,32 @@ class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody UserDTO userDTO) {
-        userService.register(userDTO);
-        return ResponseEntity.ok("User registered successfully");
+    public ResponseEntity<Long> register(@RequestBody UserDTO userDTO) {
+        try {
+            User user = userService.register(userDTO);
+            return ResponseEntity.status(201).body(user.getId());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(409).build();
+        }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UserDTO userDTO) {
-        userService.login(userDTO.username(), userDTO.password());
-        return ResponseEntity.ok("Login successful");
+    public ResponseEntity<Long> login(@RequestBody UserDTO userDTO) {
+        try {
+            User user = userService.login(userDTO.username(), userDTO.password());
+            return ResponseEntity.ok(user.getId());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(401).build();
+        }
+    }
+
+    @GetMapping("/getId/{username}")
+    public ResponseEntity<Long> getUserIdFromUsername(@PathVariable String username) {
+        try {
+            Long userId = userService.getUserIdFromUsername(username);
+            return ResponseEntity.ok(userId);
+        } catch (NullPointerException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
