@@ -1,8 +1,8 @@
 <script setup>
 defineProps({
-  deleteLog: { type: Function, required: true },
-  formatDate: { type: String, required: true },
-  log: { type: Object, required: true },
+  deleteLog: {type: Function, required: true},
+  formatDate: {type: String, required: true},
+  log: {type: Object, required: true},
 })
 </script>
 
@@ -10,7 +10,7 @@ defineProps({
   <div class="log-header">
     <span class="log-date">{{ formatDate }}</span>
     <span class="difficulty-badge" :class="log.difficulty.toLowerCase()">{{ log.difficulty }}</span>
-    <button class="delete-btn" @click="deleteLog">&times;</button>
+    <button class="delete-btn" @click.stop="deleteLog"> delete</button>
   </div>
   <p v-if="log.comment" class="log-comment">{{ log.comment }}</p>
   <div class="log-meta">
@@ -85,12 +85,13 @@ defineProps({
 
 .delete-btn {
   margin-left: auto;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.65rem;
   background: none;
-  border: none;
-  font-size: 1.1rem;
-  color: #999;
+  border: 1px solid #e53e3e;
+  border-radius: 3px;
+  color: #e53e3e;
   cursor: pointer;
-  padding: 0 0.3rem;
 }
 
 .delete-btn:hover {
