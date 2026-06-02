@@ -3,7 +3,9 @@ import {ref, inject, onMounted, watch, computed} from 'vue'
 import router from "@/router/index.js"
 import {useAuthStore} from '@/stores/auth.js'
 import TourListTile from '@/components/TourListTile.vue'
+import AutocompleteInput from '@/components/AutocompleteInput.vue'
 import {useOpenRoute} from '@/composables/useOpenRoute.js'
+import {useAutocomplete} from '@/composables/useAutocomplete.js'
 import {useMapping} from "@/composables/useMapping.js"
 
 const sidebarOpen = inject('sidebarOpen')
@@ -45,8 +47,10 @@ function onImageSelected(event) {
 async function saveTour() {
   formError.value = ''
 
-  if (/\d/.test(newTour.value.from) || /\d/.test(newTour.value.to)) {
-    alert('Numbers are not accepted.')
+  const fromHasDigits = /\d/.test(newTour.value.from)
+  const toHasDigits = /\d/.test(newTour.value.to)
+  if ((fromHasDigits && !fromAc.isFromGeocode.value) || (toHasDigits && !toAc.isFromGeocode.value)) {
+    formError.value = 'Numbers are not accepted unless the location is selected from suggestions.'
     return
   }
 
@@ -85,6 +89,8 @@ async function saveTour() {
     routeEstimate.value = null
     estimateError.value = ''
     formError.value = ''
+    fromAc.reset()
+    toAc.reset()
   } else {
     formError.value = 'Failed to create tour'
   }
@@ -99,63 +105,8 @@ const estimateMinutes = ref('')
 const estimateError = ref('')
 const formError = ref('')
 
-const {getAutocomplete} = useOpenRoute()
-
-const fromSuggestions = ref([])
-const toSuggestions = ref([])
-const showFromSuggestions = ref(false)
-const showToSuggestions = ref(false)
-
-let fromAutocompleteTimeout = null
-let toAutocompleteTimeout = null
-
-function onFromInput() {
-  clearTimeout(fromAutocompleteTimeout)
-  if (!newTour.value.from || newTour.value.from.length < 2) {
-    fromSuggestions.value = []
-    showFromSuggestions.value = false
-    return
-  }
-  fromAutocompleteTimeout = setTimeout(async () => {
-    fromSuggestions.value = await getAutocomplete(newTour.value.from)
-    showFromSuggestions.value = fromSuggestions.value.length > 0
-  }, 300)
-}
-
-function onToInput() {
-  clearTimeout(toAutocompleteTimeout)
-  if (!newTour.value.to || newTour.value.to.length < 2) {
-    toSuggestions.value = []
-    showToSuggestions.value = false
-    return
-  }
-  toAutocompleteTimeout = setTimeout(async () => {
-    toSuggestions.value = await getAutocomplete(newTour.value.to)
-    showToSuggestions.value = toSuggestions.value.length > 0
-  }, 300)
-}
-
-function selectFromSuggestion(label) {
-  newTour.value.from = label
-  showFromSuggestions.value = false
-}
-
-function selectToSuggestion(label) {
-  newTour.value.to = label
-  showToSuggestions.value = false
-}
-
-function onFromFocusOut(e) {
-  if (!e.currentTarget.contains(e.relatedTarget)) {
-    showFromSuggestions.value = false
-  }
-}
-
-function onToFocusOut(e) {
-  if (!e.currentTarget.contains(e.relatedTarget)) {
-    showToSuggestions.value = false
-  }
-}
+const fromAc = useAutocomplete()
+const toAc = useAutocomplete()
 
 let estimateTimeout = null
 watch(
@@ -205,26 +156,26 @@ onMounted(() => {
       <form class="tour-form" @submit.prevent="saveTour()">
         <h3>New Tour</h3>
         <input v-model="newTour.name" placeholder="Tour name" required="required">
-        <div class="autocomplete-wrapper" @focusout="onFromFocusOut">
-          <input v-model="newTour.from" placeholder="From" required="required"
-                 @input="onFromInput">
-          <ul v-if="showFromSuggestions" class="autocomplete-list">
-            <li v-for="s in fromSuggestions" :key="s" tabindex="0"
-                @click="selectFromSuggestion(s)"
-                @keydown.enter.prevent="selectFromSuggestion(s)">{{ s }}
-            </li>
-          </ul>
-        </div>
-        <div class="autocomplete-wrapper" @focusout="onToFocusOut">
-          <input v-model="newTour.to" placeholder="To" required="required"
-                 @input="onToInput">
-          <ul v-if="showToSuggestions" class="autocomplete-list">
-            <li v-for="s in toSuggestions" :key="s" tabindex="0"
-                @click="selectToSuggestion(s)"
-                @keydown.enter.prevent="selectToSuggestion(s)">{{ s }}
-            </li>
-          </ul>
-        </div>
+        <AutocompleteInput
+            v-model="newTour.from"
+            placeholder="From"
+            :required="true"
+            :suggestions="fromAc.suggestions.value"
+            :show-suggestions="fromAc.showSuggestions.value"
+            @input="fromAc.onInput"
+            @select="fromAc.onSelect"
+            @focusout="fromAc.onFocusOut"
+        />
+        <AutocompleteInput
+            v-model="newTour.to"
+            placeholder="To"
+            :required="true"
+            :suggestions="toAc.suggestions.value"
+            :show-suggestions="toAc.showSuggestions.value"
+            @input="toAc.onInput"
+            @select="toAc.onSelect"
+            @focusout="toAc.onFocusOut"
+        />
         <textarea v-model="newTour.description" placeholder="Description" rows="2"></textarea>
         <select v-model="newTour.transportType" required="required">
           <option value="CAR">Car</option>
@@ -371,46 +322,6 @@ onMounted(() => {
 
 .image-upload {
   width: 100%;
-}
-
-.autocomplete-wrapper {
-  position: relative;
-}
-
-.autocomplete-wrapper input {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.autocomplete-list {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  background: white;
-  border: 1px solid #ccc;
-  border-top: none;
-  border-radius: 0 0 4px 4px;
-  max-height: 180px;
-  overflow-y: auto;
-  z-index: 50;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.autocomplete-list li {
-  padding: 0.4rem 0.6rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-  color: #333;
-}
-
-.autocomplete-list li:hover,
-.autocomplete-list li:focus {
-  background: #eef1f7;
-  outline: none;
 }
 
 @media (max-width: 768px) {

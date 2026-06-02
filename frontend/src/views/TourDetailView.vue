@@ -5,10 +5,14 @@ import router from '@/router/index.js'
 import {useAuthStore} from '@/stores/auth.js'
 import Map from '@/components/Map.vue'
 import TourLogTile from "@/components/TourLogTile.vue";
+import AutocompleteInput from '@/components/AutocompleteInput.vue'
 import {useOpenRoute} from '@/composables/useOpenRoute.js'
+import {useAutocomplete} from '@/composables/useAutocomplete.js'
 import {useMapping} from "@/composables/useMapping.js";
 
 const { getCoordsFromLocationName, getDistanceAndTime } = useOpenRoute()
+const editFromAc = useAutocomplete()
+const editToAc = useAutocomplete()
 const sidebarOpen = inject('sidebarOpen')
 
 function closeSidebar() {
@@ -116,6 +120,8 @@ function startEditing() {
 
   editError.value = ''
   selectedEditImage.value = null
+  editFromAc.reset()
+  editToAc.reset()
   editingTour.value = true
 }
 
@@ -123,6 +129,8 @@ function cancelEditing() {
   editingTour.value = false
   editError.value = ''
   selectedEditImage.value = null
+  editFromAc.reset()
+  editToAc.reset()
 }
 
 function onEditImageSelected(event) {
@@ -135,8 +143,10 @@ async function saveTourUpdate() {
   const fromLocation = editTour.value.fromLocation.trim()
   const toLocation = editTour.value.toLocation.trim()
 
-  if (/\d/.test(fromLocation) || /\d/.test(toLocation)) {
-    alert('Numbers are not accepted in From and To.')
+  const fromHasDigits = /\d/.test(fromLocation)
+  const toHasDigits = /\d/.test(toLocation)
+  if ((fromHasDigits && !editFromAc.isFromGeocode.value) || (toHasDigits && !editToAc.isFromGeocode.value)) {
+    editError.value = 'Numbers are not accepted unless the location is selected from suggestions.'
     return
   }
 
@@ -326,8 +336,26 @@ const estimatedTime = computed(() => {
         <form v-if="editingTour" class="tour-edit-form" @submit.prevent="saveTourUpdate">
           <input v-model="editTour.name" required placeholder="Tour name">
 
-          <input v-model="editTour.fromLocation" required placeholder="From">
-          <input v-model="editTour.toLocation" required placeholder="To">
+          <AutocompleteInput
+              v-model="editTour.fromLocation"
+              placeholder="From"
+              :required="true"
+              :suggestions="editFromAc.suggestions.value"
+              :show-suggestions="editFromAc.showSuggestions.value"
+              @input="editFromAc.onInput"
+              @select="editFromAc.onSelect"
+              @focusout="editFromAc.onFocusOut"
+          />
+          <AutocompleteInput
+              v-model="editTour.toLocation"
+              placeholder="To"
+              :required="true"
+              :suggestions="editToAc.suggestions.value"
+              :show-suggestions="editToAc.showSuggestions.value"
+              @input="editToAc.onInput"
+              @select="editToAc.onSelect"
+              @focusout="editToAc.onFocusOut"
+          />
 
           <textarea v-model="editTour.description" placeholder="Description" rows="3"></textarea>
 
