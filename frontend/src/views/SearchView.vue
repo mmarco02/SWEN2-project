@@ -81,7 +81,7 @@ watch(searchInput, () => {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 800px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 1.5rem;
   overflow-y: auto;
