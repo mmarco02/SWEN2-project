@@ -56,7 +56,7 @@ async function deleteTour() {
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .tour-tile {
@@ -76,11 +76,11 @@ async function deleteTour() {
   align-self: center;
   margin-left: 0.75rem;
   border-radius: 6px;
-  background: #ddd;
+  background: var(--color-border);
 }
 
 .tour-tile-wrapper:hover {
-  background: #eef1f7;
+  background: var(--color-bg-hover);
 }
 
 .tour-tile:hover {
@@ -98,31 +98,23 @@ async function deleteTour() {
   font-size: 0.95rem;
 }
 
-.transport-badge {
-  font-size: 0.7rem;
-  background: #d1d5db;
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
-  text-transform: lowercase;
-}
-
 .tour-route {
   margin: 0.25rem 0;
   font-size: 0.85rem;
-  color: #555;
+  color: var(--color-text-secondary);
 }
 
 .tour-author {
   margin: 0.15rem 0;
   font-size: 0.75rem;
-  color: #999;
+  color: var(--color-text-muted);
   font-style: italic;
 }
 
 .tour-description {
   margin: 0.25rem 0;
   font-size: 0.8rem;
-  color: #777;
+  color: var(--color-text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -132,23 +124,7 @@ async function deleteTour() {
   display: flex;
   gap: 1rem;
   font-size: 0.75rem;
-  color: #888;
+  color: var(--color-text-muted);
   margin-top: 0.25rem;
-}
-
-.delete-btn {
-  margin-left: auto;
-  padding: 0.1rem 0.4rem;
-  font-size: 0.65rem;
-  background: none;
-  border: 1px solid #e53e3e;
-  border-radius: 3px;
-  color: #e53e3e;
-  cursor: pointer;
-}
-
-.delete-btn:hover {
-  background: #e53e3e;
-  color: white;
 }
 </style>

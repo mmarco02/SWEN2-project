@@ -143,7 +143,7 @@ onMounted(() => {
   <div class="main-layout">
     <div v-if="sidebarOpen" class="sidebar-overlay" @click="sidebarOpen = false"></div>
     <aside class="sidebar" :class="{ open: sidebarOpen }">
-      <button v-if="sidebarOpen" class="close-sidebar" @click="closeSidebar">&times;</button>
+      <button v-if="sidebarOpen" class="sidebar-close-btn" @click="closeSidebar">&times;</button>
       <div class="sidebar-header">
         <h2>Your Tours</h2>
         <button @click="router.push('/search')">Search Tours</button>
@@ -227,8 +227,8 @@ onMounted(() => {
 .sidebar {
   width: 320px;
   min-width: 320px;
-  background: #f5f6fa;
-  border-right: 1px solid #ddd;
+  background: var(--color-bg-secondary);
+  border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -236,7 +236,7 @@ onMounted(() => {
 
 .sidebar-header {
   padding: 1rem;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .sidebar-header h2 {
@@ -245,7 +245,7 @@ onMounted(() => {
 
 .tour-form {
   padding: 1rem;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -270,20 +270,20 @@ onMounted(() => {
   flex-direction: column;
   gap: 0.3rem;
   padding: 0.5rem;
-  background: #f0f0f0;
+  background: var(--color-bg-secondary);
   border-radius: 4px;
   font-size: 0.85rem;
 }
 
 .estimate-info {
   font-size: 0.75rem;
-  color: #888;
+  color: var(--color-text-muted);
   font-style: italic;
 }
 
 .estimate-error {
   font-size: 0.8rem;
-  color: #e53e3e;
+  color: var(--color-danger);
 }
 
 .estimate-row {
@@ -292,28 +292,14 @@ onMounted(() => {
 }
 
 .no-est {
-  color: #444;
+  color: var(--color-text-secondary);
   opacity: 0.6;
 }
 
 .form-error {
   font-size: 0.8rem;
-  color: #e53e3e;
+  color: var(--color-danger);
   padding: 0.3rem 0;
-}
-
-.empty-state {
-  padding: 2rem;
-  text-align: center;
-  color: #999;
-}
-
-.sidebar-overlay {
-  display: none;
-}
-
-.close-sidebar {
-  display: none;
 }
 
 .image-upload {
@@ -337,31 +323,12 @@ onMounted(() => {
     transform: translateX(0);
   }
 
-  .sidebar-overlay {
-    display: block;
-    position: fixed;
-    inset: 0;
-    z-index: 99;
-    background: rgba(0, 0, 0, 0.4);
-  }
-
   .detail-panel {
     width: 100%;
   }
 
-  .close-sidebar {
-    display: block;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: #555;
-    cursor: pointer;
-    padding: 0.3rem 0.6rem;
+  .sidebar-close-btn {
     align-self: flex-start;
-  }
-
-  .close-sidebar:hover {
-    color: #e53e3e;
   }
 }
 </style>

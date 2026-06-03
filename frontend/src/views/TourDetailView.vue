@@ -360,7 +360,7 @@ const estimatedTime = computed(() => {
     <div v-if="sidebarOpen" class="sidebar-overlay" @click="closeSidebar"></div>
     <div class="detail-sidebar" :class="{ open: sidebarOpen }">
       <div class="top-bar">
-        <button class="close-sidebar-btn" @click="closeSidebar">&times;</button>
+        <button class="sidebar-close-btn" @click="closeSidebar">&times;</button>
         <button class="back-btn" @click="router.push('/')">&#8592; Back</button>
         <button class="delete-tour-btn" @click="deleteTour">Delete Tour</button>
         <button class="edit-tour-btn" @click="startEditing">Edit Tour</button>
@@ -544,7 +544,7 @@ const estimatedTime = computed(() => {
   align-items: center;
   justify-content: center;
   flex: 1;
-  color: #999;
+  color: var(--color-text-muted);
   font-size: 1.1rem;
 }
 
@@ -557,8 +557,8 @@ const estimatedTime = computed(() => {
 .detail-sidebar {
   width: 380px;
   min-width: 380px;
-  background: #f5f6fa;
-  border-right: 1px solid #ddd;
+  background: var(--color-bg-secondary);
+  border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -569,7 +569,7 @@ const estimatedTime = computed(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .back-btn {
@@ -579,47 +579,48 @@ const estimatedTime = computed(() => {
   text-align: left;
   font-size: 0.9rem;
   cursor: pointer;
-  color: #555;
+  color: var(--color-text-secondary);
 }
 
 .back-btn:hover {
-  background: #eef1f7;
+  background: var(--color-bg-hover);
 }
 
 .delete-tour-btn {
   padding: 0.4rem 0.8rem;
   margin-right: 0.5rem;
   background: none;
-  border: 1px solid #e53e3e;
+  border: 1px solid var(--color-danger);
   border-radius: 4px;
-  color: #e53e3e;
+  color: var(--color-danger);
   font-size: 0.8rem;
   cursor: pointer;
 }
 
 .delete-tour-btn:hover {
-  background: #e53e3e;
+  background: var(--color-danger);
   color: white;
 }
+
 .edit-tour-btn {
   padding: 0.4rem 0.8rem;
   margin-right: 0.5rem;
   background: none;
-  border: 1px solid #4a90d9;
+  border: 1px solid var(--color-accent);
   border-radius: 4px;
-  color: #4a90d9;
+  color: var(--color-accent);
   font-size: 0.8rem;
   cursor: pointer;
 }
 
 .edit-tour-btn:hover {
-  background: #4a90d9;
+  background: var(--color-accent);
   color: white;
 }
 
 .tour-info {
   padding: 1rem;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .tour-header {
@@ -633,38 +634,30 @@ const estimatedTime = computed(() => {
   font-size: 1.2rem;
 }
 
-.transport-badge {
-  font-size: 0.7rem;
-  background: #d1d5db;
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
-  text-transform: lowercase;
-}
-
 .tour-route {
   margin: 0.4rem 0;
   font-size: 0.9rem;
-  color: #555;
+  color: var(--color-text-secondary);
 }
 
 .tour-author {
   margin: 0.15rem 0;
   font-size: 0.8rem;
-  color: #999;
+  color: var(--color-text-muted);
   font-style: italic;
 }
 
 .tour-description {
   margin: 0.4rem 0;
   font-size: 0.85rem;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .tour-meta {
   display: flex;
   gap: 1.5rem;
   font-size: 0.85rem;
-  color: #555;
+  color: var(--color-text-secondary);
   margin-top: 0.5rem;
 }
 
@@ -696,7 +689,7 @@ const estimatedTime = computed(() => {
 
 .edit-error {
   font-size: 0.8rem;
-  color: #e53e3e;
+  color: var(--color-danger);
 }
 
 .edit-actions {
@@ -709,7 +702,7 @@ const estimatedTime = computed(() => {
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .logs-header h3 {
@@ -719,7 +712,7 @@ const estimatedTime = computed(() => {
 .add-log-btn {
   font-size: 0.8rem;
   padding: 0.3rem 0.6rem;
-  border: 1px solid #bbb;
+  border: 1px solid var(--color-border-input);
   border-radius: 4px;
   background: white;
   color: black;
@@ -727,12 +720,12 @@ const estimatedTime = computed(() => {
 }
 
 .add-log-btn:hover {
-  background: #eef1f7;
+  background: var(--color-bg-hover);
 }
 
 .log-form {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -743,7 +736,7 @@ const estimatedTime = computed(() => {
 .log-form select {
   width: 100%;
   padding: 0.4rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border-input);
   border-radius: 4px;
   font-size: 0.85rem;
   box-sizing: border-box;
@@ -754,7 +747,7 @@ const estimatedTime = computed(() => {
   flex-direction: column;
   gap: 0.2rem;
   font-size: 0.8rem;
-  color: #555;
+  color: var(--color-text-secondary);
   flex: 1;
 }
 
@@ -765,7 +758,7 @@ const estimatedTime = computed(() => {
 
 .log-form button[type="submit"] {
   padding: 0.5rem;
-  background: #4a90d9;
+  background: var(--color-accent);
   color: white;
   border: none;
   border-radius: 4px;
@@ -774,19 +767,12 @@ const estimatedTime = computed(() => {
 }
 
 .log-form button[type="submit"]:hover {
-  background: #3a7bc8;
-}
-
-.empty-state {
-  padding: 2rem;
-  text-align: center;
-  color: #999;
-  font-size: 0.9rem;
+  background: var(--color-accent-hover);
 }
 
 .log-entry {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--color-border);
   cursor: pointer;
 }
 
@@ -794,24 +780,6 @@ const estimatedTime = computed(() => {
   flex: 1;
   z-index: 0;
   position: relative;
-}
-
-.sidebar-overlay {
-  display: none;
-}
-
-.close-sidebar-btn {
-  display: none;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: #555;
-  cursor: pointer;
-  padding: 0.4rem 0.6rem;
-}
-
-.close-sidebar-btn:hover {
-  color: #e53e3e;
 }
 
 @media (max-width: 768px) {
@@ -829,18 +797,6 @@ const estimatedTime = computed(() => {
 
   .detail-sidebar.open {
     transform: translateX(0);
-  }
-
-  .sidebar-overlay {
-    display: block;
-    position: fixed;
-    inset: 0;
-    z-index: 99;
-    background: rgba(0, 0, 0, 0.4);
-  }
-
-  .close-sidebar-btn {
-    display: block;
   }
 
   .map-panel {

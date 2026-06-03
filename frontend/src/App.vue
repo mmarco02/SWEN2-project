@@ -25,6 +25,25 @@ provide('sidebarOpen', sidebarOpen)
 
 
 <style>
+:root {
+  --color-primary: #2c3e50;
+  --color-primary-hover: #1a252f;
+  --color-accent: #4a90d9;
+  --color-accent-hover: #3a7bc8;
+  --color-danger: #e53e3e;
+
+  --color-bg-secondary: #f5f6fa;
+  --color-bg-hover: #eef1f7;
+  --color-bg-badge: #d1d5db;
+
+  --color-border: #ddd;
+  --color-border-input: #ccc;
+
+  --color-text: #333;
+  --color-text-secondary: #555;
+  --color-text-muted: #888;
+}
+
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -40,13 +59,13 @@ html, body {
   flex-direction: column;
   height: 100vh;
   font-family: Roboto, sans-serif;
-  color: #333;
+  color: var(--color-text);
   overflow: hidden;
 }
 
 input, select, textarea {
   padding: 0.5rem 0.75rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border-input);
   border-radius: 6px;
   font-size: 0.95rem;
   outline: none;
@@ -54,14 +73,14 @@ input, select, textarea {
 }
 
 input:focus, select:focus, textarea:focus {
-  border-color: #2c3e50;
+  border-color: var(--color-primary);
 }
 
 button {
   padding: 0.5rem 1.25rem;
   border: none;
   border-radius: 6px;
-  background-color: #2c3e50;
+  background-color: var(--color-primary);
   color: #fff;
   font-size: 0.95rem;
   cursor: pointer;
@@ -69,7 +88,72 @@ button {
 }
 
 button:hover {
-  background-color: #1a252f;
+  background-color: var(--color-primary-hover);
+}
+
+/* Shared classes */
+
+.transport-badge {
+  font-size: 0.7rem;
+  background: var(--color-bg-badge);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  text-transform: lowercase;
+}
+
+.delete-btn {
+  margin-left: auto;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.65rem;
+  background: none;
+  border: 1px solid var(--color-danger);
+  border-radius: 3px;
+  color: var(--color-danger);
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background: var(--color-danger);
+  color: white;
+}
+
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+.sidebar-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0.3rem 0.6rem;
+}
+
+.sidebar-close-btn:hover {
+  color: var(--color-danger);
+}
+
+@media (max-width: 768px) {
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  .sidebar-close-btn {
+    display: block;
+  }
 }
 </style>
 
@@ -79,7 +163,7 @@ button:hover {
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1.5rem;
-  background-color: #2c3e50;
+  background-color: var(--color-primary);
   color: #fff;
 }
 
@@ -106,11 +190,6 @@ button:hover {
 .nav-links a:hover {
   background-color: rgba(255, 255, 255, 0.15);
 }
-/*
-.nav-links a.router-link-active {
-  background-color: rgba(255, 255, 255, 0.15);
-}
- */
 
 .menu-toggle {
   display: none;

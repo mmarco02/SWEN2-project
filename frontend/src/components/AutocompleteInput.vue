@@ -66,7 +66,7 @@ function onWrapperFocusOut(e) {
   padding: 0;
   list-style: none;
   background: white;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border-input);
   border-top: none;
   border-radius: 0 0 4px 4px;
   max-height: 180px;
@@ -79,12 +79,12 @@ function onWrapperFocusOut(e) {
   padding: 0.4rem 0.6rem;
   font-size: 0.85rem;
   cursor: pointer;
-  color: #333;
+  color: var(--color-text);
 }
 
 .autocomplete-list li:hover,
 .autocomplete-list li:focus {
-  background: #eef1f7;
+  background: var(--color-bg-hover);
   outline: none;
 }
 </style>

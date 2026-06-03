@@ -21,50 +21,6 @@ defineProps({
 </template>
 
 <style scoped>
-
-.tour-header h2 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-.logs-header h3 {
-  margin: 0;
-}
-
-.log-form textarea,
-.log-form input,
-.log-form select {
-  width: 100%;
-  padding: 0.4rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  box-sizing: border-box;
-}
-
-.log-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  font-size: 0.8rem;
-  color: #555;
-  flex: 1;
-}
-
-.log-form button[type="submit"] {
-  padding: 0.5rem;
-  background: #4a90d9;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.85rem;
-}
-
-.log-form button[type="submit"]:hover {
-  background: #3a7bc8;
-}
-
 .log-header {
   display: flex;
   align-items: center;
@@ -73,7 +29,7 @@ defineProps({
 
 .log-date {
   font-size: 0.8rem;
-  color: #777;
+  color: var(--color-text-muted);
 }
 
 .difficulty-badge {
@@ -83,33 +39,17 @@ defineProps({
   text-transform: lowercase;
 }
 
-.delete-btn {
-  margin-left: auto;
-  padding: 0.1rem 0.4rem;
-  font-size: 0.65rem;
-  background: none;
-  border: 1px solid #e53e3e;
-  border-radius: 3px;
-  color: #e53e3e;
-  cursor: pointer;
-}
-
-.delete-btn:hover {
-  color: #e53e3e;
-}
-
 .log-comment {
   margin: 0.3rem 0;
   font-size: 0.85rem;
-  color: #444;
+  color: var(--color-text-secondary);
 }
 
 .log-meta {
   display: flex;
   gap: 1rem;
   font-size: 0.75rem;
-  color: #888;
+  color: var(--color-text-muted);
   margin-top: 0.2rem;
 }
-
 </style>
