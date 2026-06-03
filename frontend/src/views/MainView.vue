@@ -12,10 +12,6 @@ const sidebarOpen = inject('sidebarOpen')
 
 const auth = useAuthStore()
 
-if (!auth.isLoggedIn) {
-  router.push("/login")
-}
-
 const tours = ref([])
 const selectedTour = ref(null)
 
