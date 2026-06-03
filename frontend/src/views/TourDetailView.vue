@@ -63,11 +63,18 @@ const logTimeHours = ref(0)
 const logTimeMinutes = ref(0)
 const logDate = ref(new Date().toISOString().slice(0, 10))
 
+const fetchError = ref('')
+
 onMounted(async () => {
-  await fetchTour()
-  await Promise.all([fetchLogs(), fetchImage()])
-  await refreshTourMap()
-  loading.value = false
+  try {
+    await fetchTour()
+    await Promise.all([fetchLogs(), fetchImage()])
+    await refreshTourMap()
+  } catch (e) {
+    fetchError.value = 'Failed to load tour data.'
+  } finally {
+    loading.value = false
+  }
 })
 
 onBeforeUnmount(() => {
@@ -78,35 +85,46 @@ onBeforeUnmount(() => {
 
 async function fetchTour() {
   const res = await fetch('/tours/' + route.params.id)
-  if (res.ok) {
-    tour.value = await res.json()
-  }
+  if (!res.ok) throw new Error('Tour not found')
+  tour.value = await res.json()
 }
 
 async function fetchLogs() {
-  const res = await fetch('/tours/' + route.params.id + '/logs')
-  if (res.ok) {
-    logs.value = await res.json()
+  try {
+    const res = await fetch('/tours/' + route.params.id + '/logs')
+    if (res.ok) {
+      logs.value = await res.json()
+    }
+  } catch (e) {
+    console.error('Failed to fetch logs', e)
   }
 }
 
 async function fetchImage() {
-  const res = await fetch('/tours/' + route.params.id + '/image')
-  if (res.ok) {
-    const blob = await res.blob()
-    imageUrl.value = URL.createObjectURL(blob)
+  try {
+    const res = await fetch('/tours/' + route.params.id + '/image')
+    if (res.ok) {
+      if (imageUrl.value) URL.revokeObjectURL(imageUrl.value)
+      const blob = await res.blob()
+      imageUrl.value = URL.createObjectURL(blob)
+    }
+  } catch (e) {
+    console.error('Failed to fetch image', e)
   }
 }
+
 async function refreshTourMap() {
   if (!tour.value) return
-
-  const [start, end] = await Promise.all([
-    getCoordsFromLocationName(tour.value.fromLocation),
-    getCoordsFromLocationName(tour.value.toLocation),
-  ])
-
-  startCoords.value = start
-  endCoords.value = end
+  try {
+    const [start, end] = await Promise.all([
+      getCoordsFromLocationName(tour.value.fromLocation),
+      getCoordsFromLocationName(tour.value.toLocation),
+    ])
+    startCoords.value = start
+    endCoords.value = end
+  } catch (e) {
+    console.error('Failed to load map coordinates', e)
+  }
 }
 
 function startEditing() {
@@ -290,16 +308,30 @@ async function updateLog() {
 }
 
 async function deleteTour() {
-  const res = await fetch('/tours/' + route.params.id, { method: 'DELETE' })
-  if (res.ok) {
-    router.push('/')
+  if (!confirm('Are you sure you want to delete this tour?')) return
+  try {
+    const res = await fetch('/tours/' + route.params.id, { method: 'DELETE' })
+    if (res.ok) {
+      router.push('/')
+    } else {
+      alert('Failed to delete tour.')
+    }
+  } catch (e) {
+    alert('Failed to delete tour.')
   }
 }
 
 async function deleteLog(logId) {
-  const res = await fetch('/tours/' + route.params.id + '/logs/' + logId, { method: 'DELETE' })
-  if (res.ok) {
-    await fetchLogs()
+  if (!confirm('Are you sure you want to delete this log?')) return
+  try {
+    const res = await fetch('/tours/' + route.params.id + '/logs/' + logId, { method: 'DELETE' })
+    if (res.ok) {
+      await fetchLogs()
+    } else {
+      alert('Failed to delete log.')
+    }
+  } catch (e) {
+    alert('Failed to delete log.')
   }
 }
 
@@ -319,6 +351,8 @@ const estimatedTime = computed(() => {
 
 <template>
   <div v-if="loading" class="loading">Loading...</div>
+
+  <div v-else-if="fetchError" class="loading">{{ fetchError }}</div>
 
   <div v-else-if="!tour" class="loading">Tour not found.</div>
 

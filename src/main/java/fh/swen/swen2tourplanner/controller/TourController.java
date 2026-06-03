@@ -1,22 +1,19 @@
 package fh.swen.swen2tourplanner.controller;
 
+import fh.swen.swen2tourplanner.dto.ImageResource;
 import fh.swen.swen2tourplanner.dto.TourDTO;
-import fh.swen.swen2tourplanner.service.ImageStorageService;
+import fh.swen.swen2tourplanner.service.TourImageService;
 import fh.swen.swen2tourplanner.service.TourService;
-import fh.swen.swen2tourplanner.service.mappers.TourMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 import java.util.List;
 
 @RestController
@@ -25,100 +22,58 @@ import java.util.List;
 class TourController {
 
     private final TourService tourService;
-    private final TourMapper tourMapper;
-    private final ImageStorageService imageStorageService;
+    private final TourImageService tourImageService;
 
     @GetMapping
     public ResponseEntity<List<TourDTO>> getAll() {
-        List<TourDTO> allTours = tourMapper.mapToDTOList(tourService.getAll());
-        return ResponseEntity.ok(allTours);
+        return ResponseEntity.ok(tourService.getAll());
     }
 
     @GetMapping("/{tourId}")
     public ResponseEntity<TourDTO> getById(@PathVariable Long tourId) {
-        try {
-            return ResponseEntity.ok(tourMapper.mapToDTO(tourService.getById(tourId)));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(tourService.getById(tourId));
     }
 
     @PostMapping("/create")
     public ResponseEntity<TourDTO> createTour(@RequestBody TourDTO tour) {
-        try {
-            TourDTO createdTour = tourMapper.mapToDTO(tourService.createTour(tour));
-            return ResponseEntity.status(201).body(createdTour);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(tourService.createTour(tour));
     }
 
     @PutMapping("/{tourId}")
     public ResponseEntity<TourDTO> update(@PathVariable Long tourId, @RequestBody TourDTO tourDTO) {
-        try {
-            TourDTO updatedDTO = tourMapper.mapToDTO(tourService.updateTour(tourId, tourDTO));
-            return ResponseEntity.ok(updatedDTO);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(tourService.updateTour(tourId, tourDTO));
     }
 
     @DeleteMapping("/{tourId}")
     public ResponseEntity<Void> delete(@PathVariable Long tourId) {
-        try {
-            tourService.deleteTour(tourId);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            return ResponseEntity.notFound().build();
-        }
+        tourService.deleteTour(tourId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/getFromTo")
-    public ResponseEntity<List<TourDTO>> getToursFromTo(@RequestParam String from, @RequestParam String to){
-        List<TourDTO> tourDTOS = tourMapper.mapToDTOList(tourService.getToursFromTo(from, to));
-        return ResponseEntity.ok(tourDTOS);
+    public ResponseEntity<List<TourDTO>> getToursFromTo(@RequestParam String from, @RequestParam String to) {
+        return ResponseEntity.ok(tourService.getToursFromTo(from, to));
     }
 
     @GetMapping("users/{userId}")
     public ResponseEntity<List<TourDTO>> getToursFromUser(@PathVariable Long userId) {
-        List<TourDTO> tourDTOS = tourMapper.mapToDTOList(tourService.getToursByUserId(userId));
-        return ResponseEntity.ok(tourDTOS);
+        return ResponseEntity.ok(tourService.getToursByUserId(userId));
     }
 
     @PostMapping("/{tourId}/image")
-    public ResponseEntity<TourDTO> uploadImage(@PathVariable Long tourId, @RequestParam("file") MultipartFile file) {
-        try {
-            TourDTO updated = tourService.uploadImage(tourId, file);
-            return ResponseEntity.ok(updated);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<TourDTO> uploadImage(@PathVariable Long tourId, @RequestParam("file") MultipartFile file) throws IOException {
+        return ResponseEntity.ok(tourImageService.uploadImage(tourId, file));
     }
 
     @GetMapping("/{tourId}/image")
-    public ResponseEntity<Resource> getImage(@PathVariable Long tourId) {
-        try {
-            var tour = tourService.getById(tourId);
-            if (tour.getImagePath() == null) {
-                return ResponseEntity.notFound().build();
-            }
-            Path filePath = imageStorageService.load(tour.getImagePath());
-            Resource resource = new UrlResource(filePath.toUri());
-            if (!resource.exists()) {
-                return ResponseEntity.notFound().build();
-            }
-            String contentType = Files.probeContentType(filePath);
-            if (contentType == null) {
-                contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
-            }
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + tour.getImagePath() + "\"")
-                    .contentType(MediaType.parseMediaType(contentType))
-                    .body(resource);
-        } catch (Exception e) {
+    public ResponseEntity<Resource> getImage(@PathVariable Long tourId) throws IOException {
+        ImageResource image = tourImageService.getImage(tourId);
+        if (image == null) {
             return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + image.filename() + "\"")
+                .contentType(MediaType.parseMediaType(image.contentType()))
+                .body(image.resource());
     }
 }

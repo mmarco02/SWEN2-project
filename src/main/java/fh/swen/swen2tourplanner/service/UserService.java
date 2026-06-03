@@ -2,12 +2,13 @@ package fh.swen.swen2tourplanner.service;
 
 import fh.swen.swen2tourplanner.domain.User;
 import fh.swen.swen2tourplanner.dto.UserDTO;
+import fh.swen.swen2tourplanner.exception.AuthenticationFailedException;
+import fh.swen.swen2tourplanner.exception.ResourceAlreadyExistsException;
+import fh.swen.swen2tourplanner.exception.ResourceNotFoundException;
 import fh.swen.swen2tourplanner.persistence.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +20,7 @@ public class UserService {
 
     public User register(UserDTO dto) {
         if (userRepository.findByUsername(dto.username()).isPresent()) {
-            throw new IllegalArgumentException("Username already taken");
+            throw new ResourceAlreadyExistsException("Username already taken");
         }
         User user = new User();
         user.setUsername(dto.username());
@@ -29,21 +30,18 @@ public class UserService {
 
     public User login(String username, String password) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
+                .orElseThrow(() -> new AuthenticationFailedException("Invalid username or password"));
 
         if (!passwordHash.verify(password, user.getPassword())) {
-            throw new IllegalArgumentException("Invalid username or password");
+            throw new AuthenticationFailedException("Invalid username or password");
         }
 
         return user;
     }
 
     public Long getUserIdFromUsername(String username) {
-        Optional<User> user = userRepository.findByUsername(username);
-        if(user.isEmpty()) {
-            throw new NullPointerException("User not found");
-        }
-
-        return user.get().getId();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username))
+                .getId();
     }
 }

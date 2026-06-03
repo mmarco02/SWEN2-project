@@ -11,9 +11,16 @@ const props = defineProps({
 const emit = defineEmits(['deleted'])
 
 async function deleteTour() {
-  const res = await fetch('/tours/' + props.tour.id, { method: 'DELETE' })
-  if (res.ok) {
-    emit('deleted')
+  if (!confirm('Are you sure you want to delete "' + props.tour.name + '"?')) return
+  try {
+    const res = await fetch('/tours/' + props.tour.id, { method: 'DELETE' })
+    if (res.ok) {
+      emit('deleted')
+    } else {
+      alert('Failed to delete tour.')
+    }
+  } catch (e) {
+    alert('Failed to delete tour.')
   }
 }
 

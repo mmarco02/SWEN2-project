@@ -4,6 +4,7 @@ import fh.swen.swen2tourplanner.domain.Tour;
 import fh.swen.swen2tourplanner.domain.TourLog;
 import fh.swen.swen2tourplanner.domain.User;
 import fh.swen.swen2tourplanner.dto.TourLogDTO;
+import fh.swen.swen2tourplanner.exception.ResourceNotFoundException;
 import fh.swen.swen2tourplanner.persistence.TourLogRepository;
 import fh.swen.swen2tourplanner.persistence.TourRepository;
 import fh.swen.swen2tourplanner.persistence.UserRepository;
@@ -11,6 +12,7 @@ import fh.swen.swen2tourplanner.service.mappers.TourLogMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,36 +26,36 @@ public class TourLogService {
     private final UserRepository userRepository;
     private final TourLogMapper tourLogMapper;
 
-    public List<TourLog> getByTourId(Long tourId) {
-        return tourLogRepository.findByTourId(tourId);
+    public List<TourLogDTO> getByTourId(Long tourId) {
+        return tourLogMapper.mapToDTOList(tourLogRepository.findByTourId(tourId));
     }
 
-    public TourLog create(TourLogDTO dto) {
-        Tour tour = tourRepository.findById(dto.tourId())
-                .orElseThrow(() -> new IllegalArgumentException("Tour not found"));
+    @Transactional
+    public TourLogDTO create(Long tourId, TourLogDTO dto) {
+        Tour tour = tourRepository.findById(tourId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tour", tourId));
         User user = userRepository.findById(dto.userId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", dto.userId()));
 
         TourLog tourLog = tourLogMapper.mapToEntity(dto);
         tourLog.setTour(tour);
         tourLog.setUser(user);
-        return tourLogRepository.save(tourLog);
+        return tourLogMapper.mapToDTO(tourLogRepository.save(tourLog));
     }
 
-    public TourLog update(Long id, TourLogDTO dto) {
+    @Transactional
+    public TourLogDTO update(Long id, TourLogDTO dto) {
         TourLog existing = tourLogRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Tour log not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("TourLog", id));
 
-        existing.setDateTime(dto.dateTime());
-        existing.setComment(dto.comment());
-        existing.setDifficulty(dto.difficulty());
-        existing.setTotalDistance(dto.totalDistance());
-        existing.setTotalTime(dto.totalTime());
-        existing.setRating(dto.rating());
-        return tourLogRepository.save(existing);
+        tourLogMapper.updateEntity(existing, dto);
+        return tourLogMapper.mapToDTO(tourLogRepository.save(existing));
     }
 
     public void delete(Long id) {
+        if (!tourLogRepository.existsById(id)) {
+            throw new ResourceNotFoundException("TourLog", id);
+        }
         tourLogRepository.deleteById(id);
     }
 }
