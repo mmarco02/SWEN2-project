@@ -1,6 +1,6 @@
 package fh.swen.swen2tourplanner.controller;
 
-import fh.swen.swen2tourplanner.domain.SearchResult;
+import fh.swen.swen2tourplanner.dto.SearchResultDTO;
 import fh.swen.swen2tourplanner.service.SearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +17,8 @@ class SearchController {
     private final SearchService searchService;
 
     @GetMapping
-    public ResponseEntity<SearchResult> getFullTextSearch(@RequestParam String query) {
-        SearchResult results = searchService.fullTextSearch(query);
+    public ResponseEntity<SearchResultDTO> getFullTextSearch(@RequestParam String query) {
+        SearchResultDTO results = searchService.fullTextSearch(query);
         return ResponseEntity.ok(results);
     }
 }

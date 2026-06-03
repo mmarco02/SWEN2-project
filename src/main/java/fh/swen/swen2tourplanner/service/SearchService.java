@@ -1,8 +1,10 @@
 package fh.swen.swen2tourplanner.service;
 
-import fh.swen.swen2tourplanner.domain.SearchResult;
 import fh.swen.swen2tourplanner.domain.Tour;
 import fh.swen.swen2tourplanner.domain.TourLog;
+import fh.swen.swen2tourplanner.dto.SearchResultDTO;
+import fh.swen.swen2tourplanner.service.mappers.TourLogMapper;
+import fh.swen.swen2tourplanner.service.mappers.TourMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +25,11 @@ public class SearchService {
 
     @PersistenceContext
     private final EntityManager entityManager;
+    private final TourMapper tourMapper;
+    private final TourLogMapper tourLogMapper;
 
     @Transactional(readOnly = true)
-    public SearchResult fullTextSearch(String query) {
+    public SearchResultDTO fullTextSearch(String query) {
         log.info("Full-text search: query=\"{}\"", query);
 
         SearchSession searchSession = Search.session(entityManager);
@@ -44,7 +48,7 @@ public class SearchService {
 
         log.debug("Search results: {} tours, {} tour logs", tours.size(), tourLogs.size());
 
-        return new SearchResult(tours, tourLogs);
+        return new SearchResultDTO(tourMapper.mapToDTOList(tours), tourLogMapper.mapToDTOList(tourLogs));
     }
 
     // Indexes all Entities on Backend Startup (because normally data added from data.sql on startup isnt)
