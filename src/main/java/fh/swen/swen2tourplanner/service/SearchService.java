@@ -16,7 +16,9 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,18 +34,22 @@ public class SearchService {
     public SearchResultDTO fullTextSearch(String query) {
         log.info("Full-text search: query=\"{}\"", query);
 
+        String fuzzyQuery = Arrays.stream(query.trim().split("\\s+"))
+                .map(term -> term + "~")
+                .collect(Collectors.joining(" "));
+
         SearchSession searchSession = Search.session(entityManager);
 
         List<Tour> tours = searchSession.search(Tour.class)
                 .where(f -> f.simpleQueryString()
                         .fields("name", "description", "fromLocation", "toLocation", "transportType")
-                        .matching(query))
+                        .matching(fuzzyQuery))
                 .fetchAllHits();
 
         List<TourLog> tourLogs = searchSession.search(TourLog.class)
                 .where(f -> f.simpleQueryString()
                         .fields("comment", "difficulty")
-                        .matching(query))
+                        .matching(fuzzyQuery))
                 .fetchAllHits();
 
         log.debug("Search results: {} tours, {} tour logs", tours.size(), tourLogs.size());
