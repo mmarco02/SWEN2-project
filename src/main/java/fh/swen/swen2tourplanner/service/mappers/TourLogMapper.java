@@ -34,4 +34,14 @@ public class TourLogMapper extends AbstractMapper<TourLog, TourLogDTO> {
                 .rating(dto.rating())
                 .build();
     }
+
+    @Override
+    public void updateEntity(TourLog tourLog, TourLogDTO dto) {
+        tourLog.setDateTime(dto.dateTime());
+        tourLog.setComment(dto.comment());
+        tourLog.setDifficulty(dto.difficulty());
+        tourLog.setTotalDistance(dto.totalDistance());
+        tourLog.setTotalTime(dto.totalTime());
+        tourLog.setRating(dto.rating());
+    }
 }

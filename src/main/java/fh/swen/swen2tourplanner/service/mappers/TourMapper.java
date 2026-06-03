@@ -40,4 +40,16 @@ public class TourMapper extends AbstractMapper<Tour, TourDTO> {
                 .imagePath(dto.imagePath())
                 .build();
     }
+
+    @Override
+    public void updateEntity(Tour tour, TourDTO dto) {
+        tour.setName(dto.name());
+        tour.setDescription(dto.description());
+        tour.setFromLocation(dto.fromLocation());
+        tour.setToLocation(dto.toLocation());
+        tour.setTransportType(dto.transportType());
+        tour.setDistanceKm(dto.distanceKm());
+        tour.setEstimatedTime(dto.estimatedTime());
+        tour.setRoute(dto.route());
+    }
 }

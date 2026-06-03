@@ -8,6 +8,8 @@ public abstract class AbstractMapper<E, D> {
 
     public abstract E mapToEntity(D dto);
 
+    public abstract void updateEntity(E entity, D dto);
+
     public List<D> mapToDTOList(List<E> entities) {
         return entities.stream().map(this::mapToDTO).toList();
     }
