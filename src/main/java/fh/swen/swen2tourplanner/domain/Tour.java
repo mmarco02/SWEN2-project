@@ -39,7 +39,7 @@ public class Tour {
     @Column(nullable = false)
     private String toLocation;
 
-    @KeywordField
+    @FullTextField
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TransportType transportType;
@@ -55,6 +55,14 @@ public class Tour {
 
     @Column
     private String imagePath;
+
+    @FullTextField
+    @Column
+    private String popularity;
+
+    @FullTextField
+    @Column
+    private String childFriendliness;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

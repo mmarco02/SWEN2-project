@@ -253,7 +253,7 @@ async function addLog() {
     }),
   })
   if (res.ok) {
-    await fetchLogs()
+    await Promise.all([fetchTour(), fetchLogs()])
     showLogForm.value = false
     newLog.value = { comment: '', difficulty: 'MEDIUM', totalDistance: 0, rating: 3 }
     logTimeHours.value = 0
@@ -302,7 +302,7 @@ async function updateLog() {
   })
 
   if (res.ok) {
-    await fetchLogs()
+    await Promise.all([fetchTour(), fetchLogs()])
     cancelEditingLog()
   }
 }
@@ -326,7 +326,7 @@ async function deleteLog(logId) {
   try {
     const res = await fetch('/tours/' + route.params.id + '/logs/' + logId, { method: 'DELETE' })
     if (res.ok) {
-      await fetchLogs()
+      await Promise.all([fetchTour(), fetchLogs()])
     } else {
       alert('Failed to delete log.')
     }
@@ -346,6 +346,16 @@ const estimatedTime = computed(() => {
   if (!tour.value?.estimatedTime) return { hours: 0, minutes: 0 }
   return minutesToHrsAndMins(tour.value.estimatedTime)
 })
+
+function formatPopularity(val) {
+  const labels = { POPULAR: 'Popular', AVERAGE: 'Average', UNPOPULAR: 'Unpopular' }
+  return labels[val] || val
+}
+
+function formatChildFriendliness(val) {
+  const labels = { CHILD_FRIENDLY: 'Child-Friendly', MODERATE: 'Moderate', NOT_CHILD_FRIENDLY: 'Not Child-Friendly' }
+  return labels[val] || val
+}
 
 </script>
 
@@ -421,6 +431,14 @@ const estimatedTime = computed(() => {
           <div class="tour-meta">
             <span v-if="tour.distanceKm"><strong>Distance:</strong> {{ tour.distanceKm }} km</span>
             <span v-if="tour.estimatedTime"><strong>Est. time:</strong> {{ estimatedTime.hours }} h {{ estimatedTime.minutes }} min</span>
+          </div>
+          <div class="tour-computed" v-if="tour.popularity || tour.childFriendliness">
+            <span v-if="tour.popularity" class="computed-badge" :class="'popularity-' + tour.popularity.toLowerCase()">
+              {{ formatPopularity(tour.popularity) }}
+            </span>
+            <span v-if="tour.childFriendliness" class="computed-badge" :class="'cf-' + tour.childFriendliness.toLowerCase().replaceAll('_', '-')">
+              {{ formatChildFriendliness(tour.childFriendliness) }}
+            </span>
           </div>
           <img v-if="imageUrl" :src="imageUrl" alt="Tour image" class="tour-image">
         </div>
@@ -660,6 +678,27 @@ const estimatedTime = computed(() => {
   color: var(--color-text-secondary);
   margin-top: 0.5rem;
 }
+
+.tour-computed {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.computed-badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.popularity-popular { background: #d4edda; color: #155724; }
+.popularity-average { background: #fff3cd; color: #856404; }
+.popularity-unpopular { background: #f8d7da; color: #721c24; }
+.cf-child-friendly { background: #cce5ff; color: #004085; }
+.cf-moderate { background: #fff3cd; color: #856404; }
+.cf-not-child-friendly { background: #f8d7da; color: #721c24; }
 
 .tour-image {
   width: 100%;

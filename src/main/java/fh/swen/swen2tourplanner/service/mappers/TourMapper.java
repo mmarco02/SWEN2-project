@@ -21,7 +21,9 @@ public class TourMapper extends AbstractMapper<Tour, TourDTO> {
                 tour.getRoute(),
                 tour.getImagePath(),
                 tour.getUser().getId(),
-                tour.getUser().getUsername()
+                tour.getUser().getUsername(),
+                tour.getPopularity(),
+                tour.getChildFriendliness()
         );
     }
 

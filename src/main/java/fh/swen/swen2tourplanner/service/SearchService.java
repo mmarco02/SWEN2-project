@@ -13,6 +13,7 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +43,7 @@ public class SearchService {
 
         List<Tour> tours = searchSession.search(Tour.class)
                 .where(f -> f.simpleQueryString()
-                        .fields("name", "description", "fromLocation", "toLocation", "transportType")
+                        .fields("name", "description", "fromLocation", "toLocation", "transportType", "popularity", "childFriendliness")
                         .matching(fuzzyQuery))
                 .fetchAllHits();
 
@@ -60,6 +61,7 @@ public class SearchService {
     // Indexes all Entities on Backend Startup (because normally data added from data.sql on startup isnt)
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
+    @Order(2)
     public void rebuildIndex() throws InterruptedException {
         log.info("Rebuilding Hibernate Search index");
         Search.session(entityManager).massIndexer().startAndWait();

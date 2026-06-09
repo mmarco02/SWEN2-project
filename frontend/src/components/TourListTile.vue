@@ -10,6 +10,16 @@ const props = defineProps({
 
 const emit = defineEmits(['deleted'])
 
+function formatPopularity(val) {
+  const labels = { POPULAR: 'Popular', AVERAGE: 'Average', UNPOPULAR: 'Unpopular' }
+  return labels[val] || val
+}
+
+function formatChildFriendliness(val) {
+  const labels = { CHILD_FRIENDLY: 'Child-Friendly', MODERATE: 'Moderate', NOT_CHILD_FRIENDLY: 'Not Child-Friendly' }
+  return labels[val] || val
+}
+
 async function deleteTour() {
   if (!confirm('Are you sure you want to delete "' + props.tour.name + '"?')) return
   try {
@@ -46,6 +56,10 @@ async function deleteTour() {
       <div class="tour-meta">
         <span v-if="tour.distanceKm">{{ tour.distanceKm }} km</span>
         <span v-if="tour.estimatedTime">{{ tour.estimatedTime }} min</span>
+      </div>
+      <div class="tour-badges" v-if="tour.popularity || tour.childFriendliness">
+        <span v-if="tour.popularity" class="badge" :class="'popularity-' + tour.popularity.toLowerCase()">{{ formatPopularity(tour.popularity) }}</span>
+        <span v-if="tour.childFriendliness" class="badge" :class="'cf-' + tour.childFriendliness.toLowerCase().replaceAll('_', '-')">{{ formatChildFriendliness(tour.childFriendliness) }}</span>
       </div>
     </div>
   </div>
@@ -127,4 +141,25 @@ async function deleteTour() {
   color: var(--color-text-muted);
   margin-top: 0.25rem;
 }
+
+.tour-badges {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 0.65rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.popularity-popular { background: #d4edda; color: #155724; }
+.popularity-average { background: #fff3cd; color: #856404; }
+.popularity-unpopular { background: #f8d7da; color: #721c24; }
+.cf-child-friendly { background: #cce5ff; color: #004085; }
+.cf-moderate { background: #fff3cd; color: #856404; }
+.cf-not-child-friendly { background: #f8d7da; color: #721c24; }
 </style>

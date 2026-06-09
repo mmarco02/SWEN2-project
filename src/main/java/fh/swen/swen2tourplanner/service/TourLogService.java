@@ -25,6 +25,7 @@ public class TourLogService {
     private final TourRepository tourRepository;
     private final UserRepository userRepository;
     private final TourLogMapper tourLogMapper;
+    private final TourService tourService;
 
     public List<TourLogDTO> getByTourId(Long tourId) {
         return tourLogMapper.mapToDTOList(tourLogRepository.findByTourId(tourId));
@@ -40,7 +41,9 @@ public class TourLogService {
         TourLog tourLog = tourLogMapper.mapToEntity(dto);
         tourLog.setTour(tour);
         tourLog.setUser(user);
-        return tourLogMapper.mapToDTO(tourLogRepository.save(tourLog));
+        TourLogDTO result = tourLogMapper.mapToDTO(tourLogRepository.save(tourLog));
+        tourService.recalculateComputedAttributes(tourId);
+        return result;
     }
 
     @Transactional
@@ -49,13 +52,17 @@ public class TourLogService {
                 .orElseThrow(() -> new ResourceNotFoundException("TourLog", id));
 
         tourLogMapper.updateEntity(existing, dto);
-        return tourLogMapper.mapToDTO(tourLogRepository.save(existing));
+        TourLogDTO result = tourLogMapper.mapToDTO(tourLogRepository.save(existing));
+        tourService.recalculateComputedAttributes(existing.getTour().getId());
+        return result;
     }
 
+    @Transactional
     public void delete(Long id) {
-        if (!tourLogRepository.existsById(id)) {
-            throw new ResourceNotFoundException("TourLog", id);
-        }
+        TourLog tourLog = tourLogRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("TourLog", id));
+        Long tourId = tourLog.getTour().getId();
         tourLogRepository.deleteById(id);
+        tourService.recalculateComputedAttributes(tourId);
     }
 }

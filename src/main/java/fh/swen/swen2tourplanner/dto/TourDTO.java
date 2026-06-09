@@ -14,6 +14,8 @@ public record TourDTO(
         String route,
         String imagePath,
         Long userId,
-        String userUsername
+        String userUsername,
+        String popularity,
+        String childFriendliness
 ) {
 }

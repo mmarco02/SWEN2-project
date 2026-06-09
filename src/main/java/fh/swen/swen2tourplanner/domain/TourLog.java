@@ -29,7 +29,7 @@ public class TourLog {
     @Column
     private String comment;
 
-    @KeywordField
+    @FullTextField
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Difficulty difficulty;
