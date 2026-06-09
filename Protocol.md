@@ -14,6 +14,38 @@ Users can create, edit and delete tours with start/end locations, upload images,
 
 ![Wireframe Mockup](SWEN2-Project%20Mockup.png)
 
+## Use Cases
+
+### 1: User Registration and Login
+A new user registers with a username and password. The password is hashed with BCrypt before storage. An existing user logs in by providing their credentials. On success the frontend stores the username and user ID in sessionStorage and redirects to the main page. On failure an error message is shown.
+
+### 2: Create a Tour
+The user fills in the tour creation form: name, from location, to location (both with autocomplete suggestions from OpenRouteService), transport type, description and optionally an image. When both locations are filled in the app automatically estimates the distance and time via the OpenRouteService Directions API. On submit the tour is saved to the database and appears in the tour list.
+
+### 3: View Tour Details
+The user clicks a tour in the list. The detail view shows all tour attributes (name, route, transport type, distance, estimated time, description, image, popularity, child-friendliness) in a sidebar and renders the route on a Leaflet map in the main panel. Tour logs are listed below the tour info.
+
+### 4: Edit a Tour
+The user clicks Edit on the tour detail page. The sidebar switches to an edit form pre-filled with the current values. The user can change any field including the image. If the route (from/to/transport type) changes the distance and time are re-estimated. On save the tour is updated in the database.
+
+### 5: Delete a Tour
+The user clicks Delete on a tour. A confirmation dialog appears. On confirm the tour, all its logs and its image file are deleted.
+
+### 6: Create a Tour Log
+On the tour detail page the user clicks Add Log and fills in date, comment, difficulty, distance, time and rating. On submit the log is saved and the tour's computed attributes (popularity, child-friendliness) are recalculated.
+
+### 7: Edit a Tour Log
+The user clicks an existing log entry. The log switches to an inline edit form. On save the log is updated and computed attributes are recalculated.
+
+### 8: Delete a Tour Log
+The user clicks the delete button on a log entry. A confirmation dialog appears. On confirm the log is deleted and computed attributes are recalculated.
+
+### 9: Full-Text Search
+The user navigates to the search page and types a query. The app performs a fuzzy full-text search across tour fields (name, description, locations, transport type, popularity, child-friendliness) and tour log fields (comment, difficulty). Results are displayed as two lists: matching tours and matching tour logs. Clicking a tour navigates to its detail page.
+
+### 10: Location Autocomplete (Unique Feature)
+While typing in a From or To location field the app sends the input to the OpenRouteService Autocomplete API after a 300ms debounce. A dropdown shows matching location suggestions. The user can select a suggestion with the mouse or keyboard. Selected locations are flagged so the validation knows they came from geocoding.
+
 ## Tech Stack
 
 | Layer      | Technology                                                     |
@@ -51,6 +83,7 @@ All business logic is in the Service classes. Controllers are kept minimal, they
 
 TourService
 Contains all tour CRUD operations. When uploading an image it calls ImageStorageService to save it and only stores the resulting filename on the tour entity. When deleting a tour it also deletes the file from the disk.
+Also responsible for recalculating the computed attributes (popularity and childFriendliness) based on the tour's logs. This recalculation is triggered by TourLogService after every log create, update or delete, and also runs for all tours on application startup.
 
 TourLogService
 Contains tour log CRUD operations. Validates that the referenced tour exists before creating a log.
@@ -71,9 +104,15 @@ Uses BCrypt from Spring Security for hashing and verifying passwords. We only us
 JPA entities that map to database tables.
 
 Tour
-Fields: id, name, description, fromLocation, toLocation, transportType, distanceKm, estimatedTime, route, imagePath. 
+Fields: id, name, description, fromLocation, toLocation, transportType, distanceKm, estimatedTime, route, imagePath, popularity, childFriendliness. 
 Has a @ManyToOne relation to User and @OneToMany to TourLog with cascade delete so when a tour is deleted all its logs are deleted.
 Its also annotated with @Indexed so its indexed by the Hibernate search.
+
+Computed Attributes:
+- popularity: Derived from the average rating of all tour logs. Categorized as POPULAR (avg >= 4.0), AVERAGE (avg >= 2.5) or UNPOPULAR (avg < 2.5). Null if the tour has no logs.
+- childFriendliness: Derived from the average difficulty and average distance of all tour logs. Categorized as CHILD_FRIENDLY (avg difficulty <= 1.5 and avg distance <= 10 km), MODERATE (avg difficulty <= 2.5 and avg distance <= 25 km) or NOT_CHILD_FRIENDLY (otherwise). Null if the tour has no logs.
+
+Both computed attributes are recalculated automatically whenever a tour log is created, updated or deleted. They are also recalculated for all tours on application startup before the search index is rebuilt.
 
 TourLog
 Fields: id, dateTime, comment, difficulty, totalDistance, totalTime, rating. 
@@ -244,11 +283,13 @@ Session state synced with sessionStorage.
 
 ## Full-Text Search with Hibernate Search
 
-We use Hibernate Search with a Lucene backend for full-text search across tours and tour logs. Tour fields (name, description, fromLocation, toLocation) and TourLog fields (comment, difficulty) are annotated with @FullTextField / @KeywordField, 
-which indexes them into a local Lucene index at data/index/.
+We use Hibernate Search with a Lucene backend for full-text search across tours and tour logs. Tour fields (name, description, fromLocation, toLocation, transportType, popularity, childFriendliness) and TourLog fields (comment, difficulty) are annotated with @FullTextField, 
+which indexes them into a local Lucene index at data/index/. All indexed fields use @FullTextField so the default analyzer lowercases and tokenizes the values, making the search case-insensitive.
 
-The SearchService uses simpleQueryString to search both entities and returns the results in a SearchResult object. 
-Since data.sql inserts test data before Hibernate Search can index it, we rebuild the index on every startup with `@EventListener(ApplicationReadyEvent.class)` that calls `massIndexer().startAndWait()`.
+The SearchService uses simpleQueryString to search both entities and returns the results in a SearchResult object. Each search term gets a fuzzy suffix (~) appended so minor typos still match.
+The search covers all stored tour attributes, tour log attributes and the computed attributes (popularity and childFriendliness). For example searching "popular" finds tours categorized as POPULAR, and searching "child" finds tours categorized as CHILD_FRIENDLY.
+
+Since data.sql inserts test data before Hibernate Search can index it, we rebuild the index on every startup with `@EventListener(ApplicationReadyEvent.class)` that calls `massIndexer().startAndWait()`. The computed attributes are recalculated before the index rebuild using @Order annotations to guarantee the correct startup sequence.
 
 ## Library Decisions and Lessons Learned
 
@@ -297,6 +338,34 @@ On startup data.sql in src/main/resources/ inserts test data.
 Datasource initialization is deferred so JPA creates the tables first, then data.sql runs.
 
 The Lucene index is stored at data/index/ and rebuilt on every startup.
+
+## Unique Feature: Location Autocomplete
+
+The unique feature is real-time location autocomplete in the From and To input fields when creating or editing a tour.
+
+### How it Works
+
+When the user types at least 2 characters in a location field, the input is sent to the OpenRouteService Geocode Autocomplete API after a 300ms debounce delay. The API returns a list of matching location names which are displayed in a dropdown below the input field. The user can select a suggestion by clicking it or using the keyboard (Enter key). When a suggestion is selected the input is filled with the full location name and the dropdown closes.
+
+### Implementation
+
+The feature is split into three parts:
+
+useOpenRoute.js (composable): Contains the getAutocomplete() function that calls the OpenRouteService /geocode/autocomplete endpoint with the user's text input and returns an array of location label strings.
+
+useAutocomplete.js (composable): Wraps useOpenRoute and adds the UI logic: a 300ms debounce timer so the API is not called on every keystroke, a suggestions array, a showSuggestions flag, and an isFromGeocode flag that tracks whether the current value was selected from a suggestion (used for validation).
+
+AutocompleteInput.vue (component): A reusable input component with a suggestions dropdown. It emits events for input, select and focusout. It is used four times in the app: twice in MainView (create tour form) and twice in TourDetailView (edit tour form).
+
+### Validation Integration
+
+Location inputs that contain numbers are only accepted if the value was selected from an autocomplete suggestion (tracked by isFromGeocode). This prevents users from entering coordinates or random numbers as locations while still allowing addresses that contain house numbers.
+
+## Tracked Time
+
+| Date | Who | Task | Hours |
+|------|-----|------|-------|
+| | | | |
 
 ## Version Control (Git)
 
