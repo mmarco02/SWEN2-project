@@ -1,6 +1,5 @@
 package fh.swen.swen2tourplanner.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
