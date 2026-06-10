@@ -1,0 +1,12 @@
+﻿type,tourName,description,fromLocation,toLocation,transportType,distanceKm,estimatedTime,dateTime,comment,difficulty,totalDistance,totalTime,rating
+TOUR,Wiener Stadtrundgang,Gemütlicher Spaziergang durch die Wiener Innenstadt,Wien Stephansplatz,Wien Schönbrunn,WALKING,6.2,75,,,,,,
+LOG,Wiener Stadtrundgang,,,,,,,2026-05-10T10:00:00,Wunderschöner Frühlingstag sehr empfehlenswert,EASY,6.5,80,5
+LOG,Wiener Stadtrundgang,,,,,,,2026-05-17T14:30:00,Etwas überfüllt am Nachmittag,EASY,6.3,90,3
+TOUR,Salzburg nach Innsbruck,Längere Autofahrt durch die Alpen mit tollen Ausblicken,Salzburg,Innsbruck,CAR,185.5,120,,,,,,
+LOG,Salzburg nach Innsbruck,,,,,,,2026-04-20T08:00:00,Großartige Bergstraßen kaum Verkehr,MEDIUM,190.0,130,5
+LOG,Salzburg nach Innsbruck,,,,,,,2026-06-01T09:15:00,Baustelle auf der A12 hat Zeit gekostet,MEDIUM,185.5,155,3
+TOUR,Donauradweg Linz-Grein,Fahrradtour entlang der Donau von Linz nach Grein,Linz,Grein an der Donau,BICYCLE,72.0,240,,,,,,
+LOG,Donauradweg Linz-Grein,,,,,,,2026-05-25T07:30:00,Wunderschöner Radweg direkt an der Donau,EASY,73.2,255,5
+LOG,Donauradweg Linz-Grein,,,,,,,2026-06-05T08:00:00,Gegenwind aber trotzdem schön,MEDIUM,72.0,280,4
+TOUR,Großglockner Hochalpenstraße,Busfahrt über die berühmte Großglockner Hochalpenstraße,Bruck an der Großglocknerstraße,Heiligenblut am Großglockner,BUS,48.0,90,,,,,,
+LOG,Großglockner Hochalpenstraße,,,,,,,2026-06-08T06:45:00,Atemberaubende Aussicht auf den Gletscher,HARD,48.0,95,5

@@ -134,6 +134,52 @@ function closeSidebar() {
   sidebarOpen.value = false
 }
 
+const importFile = ref(null)
+const importMessage = ref('')
+
+async function exportTours() {
+  try {
+    const res = await fetch('/tours/export/' + auth.userId)
+    if (!res.ok) { alert('Export failed'); return }
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'tours-export.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+  } catch (e) {
+    alert('Export failed')
+  }
+}
+
+function onImportFileSelected(event) {
+  importFile.value = event.target.files[0] || null
+}
+
+async function importTours() {
+  if (!importFile.value) return
+  importMessage.value = ''
+  const formData = new FormData()
+  formData.append('file', importFile.value)
+  try {
+    const res = await fetch('/tours/import/' + auth.userId, {
+      method: 'POST',
+      body: formData,
+    })
+    if (res.ok) {
+      const data = await res.json()
+      importMessage.value = 'Imported ' + data.imported + ' entries'
+      importFile.value = null
+      await fetchTours()
+    } else {
+      importMessage.value = 'Import failed'
+    }
+  } catch (e) {
+    importMessage.value = 'Import failed'
+  }
+}
+
 onMounted(() => {
   fetchTours()
 })
@@ -146,7 +192,18 @@ onMounted(() => {
       <button v-if="sidebarOpen" class="sidebar-close-btn" @click="closeSidebar">&times;</button>
       <div class="sidebar-header">
         <h2>Your Tours</h2>
-        <button @click="router.push('/search')">Search Tours</button>
+        <div class="header-actions">
+          <button @click="router.push('/search')">Search Tours</button>
+          <button @click="exportTours">Export CSV</button>
+        </div>
+        <div class="import-section">
+          <label class="import-label">
+            Import
+            <input type="file" accept=".csv" class="import-input" @change="onImportFileSelected">
+          </label>
+          <button v-if="importFile" @click="importTours" class="import-btn">Upload</button>
+          <span v-if="importMessage" class="import-message">{{ importMessage }}</span>
+        </div>
       </div>
 
       <form class="tour-form" @submit.prevent="saveTour()">
@@ -241,6 +298,40 @@ onMounted(() => {
 
 .sidebar-header h2 {
   margin-bottom: 0.5rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.import-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.import-label {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.import-input {
+  width: 100%;
+  font-size: 0.75rem;
+}
+
+.import-btn {
+  font-size: 0.8rem;
+  padding: 0.2rem 0.5rem;
+}
+
+.import-message {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
 }
 
 .tour-form {

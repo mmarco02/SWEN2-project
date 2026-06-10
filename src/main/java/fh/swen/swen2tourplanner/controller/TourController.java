@@ -2,6 +2,7 @@ package fh.swen.swen2tourplanner.controller;
 
 import fh.swen.swen2tourplanner.dto.ImageResource;
 import fh.swen.swen2tourplanner.dto.TourDTO;
+import fh.swen.swen2tourplanner.service.TourDataService;
 import fh.swen.swen2tourplanner.service.TourImageService;
 import fh.swen.swen2tourplanner.service.TourService;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/tours")
@@ -23,6 +26,7 @@ class TourController {
 
     private final TourService tourService;
     private final TourImageService tourImageService;
+    private final TourDataService tourDataService;
 
     @GetMapping
     public ResponseEntity<List<TourDTO>> getAll() {
@@ -63,6 +67,22 @@ class TourController {
     @PostMapping("/{tourId}/image")
     public ResponseEntity<TourDTO> uploadImage(@PathVariable Long tourId, @RequestParam("file") MultipartFile file) throws IOException {
         return ResponseEntity.ok(tourImageService.uploadImage(tourId, file));
+    }
+
+    @GetMapping("/export/{userId}")
+    public ResponseEntity<byte[]> exportTours(@PathVariable Long userId) {
+        String csv = tourDataService.exportToCsv(userId);
+        byte[] bytes = csv.getBytes(StandardCharsets.UTF_8);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"tours-export.csv\"")
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(bytes);
+    }
+
+    @PostMapping("/import/{userId}")
+    public ResponseEntity<Map<String, Integer>> importTours(@PathVariable Long userId, @RequestParam("file") MultipartFile file) throws IOException {
+        int count = tourDataService.importFromFile(userId, file);
+        return ResponseEntity.ok(Map.of("imported", count));
     }
 
     @GetMapping("/{tourId}/image")
